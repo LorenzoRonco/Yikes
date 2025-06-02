@@ -55,7 +55,8 @@ app.use(session({
 }));
 app.use(passport.authenticate('session'));
 
-/** */ ROUTES **/
+/** ROUTES **/
+//TODO: implement routes
 
 // activate the server
 app.listen(port, () => {

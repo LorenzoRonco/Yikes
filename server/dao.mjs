@@ -102,7 +102,7 @@ export const addGame = (game) => {
 };
 
 /** GAMES CARDS **/
-
+//TODO: implement functions for GamesCards
 /** USERS **/
 //get user
 export const getUser = (email, password) => {
