@@ -44,7 +44,7 @@ export const getCard = (id) => {
 
 /**  GAMES **/
 //get all the games of the user by its user id
-export const getGamesByUserId = (userId) => {
+export const listGamesByUserId = (userId) => {
   return new Promise((resolve, reject) => {
     const sql = "SELECT * FROM games WHERE user.Id = ?";
     db.get(sql, [userId], (err, rows) => {

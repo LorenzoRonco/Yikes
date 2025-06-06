@@ -2,6 +2,108 @@ import { Card, Game, GameCards } from "../models/GCModels.mjs";
 
 const SERVER_URL = "http://localhost:3001";
 
+
+//Get all games
+//GET /api/games
+const getGames = async () => {
+  const response = await fetch(SERVER_URL + "/api/games");
+  if(response.ok) {
+    const gamesJson = await response.json();
+    return gamesJson.map(g => new Game(g.id, g.userId, g.startedAt, g.correctGuesses, g.status));
+  }
+  else
+    throw new Error("Internal server error");
+}
+
+//Get single game
+//GET /api/games/:gameId
+const getGame = async(gameId) => {
+  const response = await fetch(SERVER_URL + `/api/games/${gameId}`);
+  if(response.ok) {
+    const gameJson = await response.json();
+    return new Game(gameJson.id, gameJson.userId, gameJson.startedAt, gameJson.correctGuesses, gameJson.status);
+  }
+  else
+    throw new Error("Internal server error");
+}
+
+//Get all rounds of a game
+//GET /api/games/:gameId/rounds
+const getRoundsOfGame = async (gameId) => {
+  const response = await fetch(SERVER_URL + `/api/games/${gameId}/rounds`);
+  if(response.ok) {
+    const gameCardsJson = await response.json();
+    return gameCardsJson.map(gc => new GameCards(gc.gameId, gc.cardId, gc.roundId, gc.guessedCorrectly));
+  }
+  else
+    throw new Error("Internal server error");
+}
+
+//Create game
+//POST /api/games
+const createGame = async (game) => {
+  const response = await fetch(SERVER_URL + '/api/games', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify(game),
+  });
+  if(response.ok) {
+    //TODO: check if create game should return the cards of the game
+    const gameJson = await response.json();
+    return new Game(gameJson.id, gameJson.userId, gameJson.startedAt, gameJson.correctGuesses, gameJson.status);
+  }
+  else {
+    //TODO: check if the error handle is correct
+    const errDetails = await response.text();
+    throw errDetails;
+  }
+}
+
+//create a new round for a game
+//POST /api/games/:gameId/rounds
+const createRound = async (gameId, round) => {
+  const response = await fetch(SERVER_URL + `/api/games/${gameId}/rounds`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify(round),
+  });
+  if(response.ok) {
+    const gameCardsJson = await response.json();
+    return new GameCards(gameCardsJson.gameId, gameCardsJson.cardId, gameCardsJson.roundId, gameCardsJson.guessedCorrectly);
+  }
+  else {
+    const errDetails = await response.text();
+    throw errDetails;
+  }
+}
+
+//upadate a game
+//PATCH /api/games/:gameId
+const updateGame = async (gameId, game) => {
+  const response = await fetch(SERVER_URL + `/api/games/${gameId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify(game),
+  });
+  if(response.ok) {
+    const gameJson = await response.json();
+    return new Game(gameJson.id, gameJson.userId, gameJson.startedAt, gameJson.correctGuesses, gameJson.status);
+  }
+  else {
+    const errDetails = await response.text();
+    throw errDetails;
+  }
+}
+
 /** LOGIN / GETUSERINFO / LOGOUT **/
 
 const logIn = async (credentials) => {
@@ -44,5 +146,5 @@ const logOut = async() => {
     return null;
 }
 
-const API = {logIn, getUserInfo, logOut };
+const API = {getGames, getGame, getRoundsOfGame, createGame, createRound, updateGame, logIn, getUserInfo, logOut };
 export default API;

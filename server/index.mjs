@@ -2,7 +2,7 @@
 import express from 'express';
 import morgan from 'morgan';
 import {check, validationResult} from 'express-validator';
-import {getUser} from './dao.mjs';
+import {getGamesByUserId, getUser} from './dao.mjs';
 import cors from 'cors';
 
 import passport from 'passport';
@@ -57,6 +57,35 @@ app.use(passport.authenticate('session'));
 
 /** ROUTES **/
 //TODO: implement routes
+// GET /api/games
+app.get('/api/games', (req, res) => {
+  listGamesByUserId(req.user.id)
+  .then(games => res.json(games))
+  .catch(() => res.status(500).end());
+});
+
+// GET /api/games/:gameId
+app.get('/api/games/:id', async (req, res) => {
+  try {
+    const game = await getGame(req.params.id);
+    if(game.error) {
+      res.status(404).json(game);
+    } else {
+      game.json(game);
+    }
+  }
+  catch {
+    res.status(500).end();
+  }
+});
+
+//GET /api/games/:gameId/rounds
+app.get('/api/games:gameId/rounds', (req, res) => {
+  listGamesByUserId(req.user.id)
+  .then(games => res.json(games))
+  .catch(() => res.status(500).end());
+});
+//TODO: finish routes
 
 // activate the server
 app.listen(port, () => {
