@@ -56,7 +56,7 @@ app.use(session({
 app.use(passport.authenticate('session'));
 
 /** ROUTES **/
-//TODO: implement routes
+
 // GET /api/games
 app.get('/api/games', (req, res) => {
   listGamesByUserId(req.user.id)
@@ -129,7 +129,51 @@ app.post("/api/games", isLoggedIn, [
   }
 });
 
+//POST /api/games/:gameId/rounds
+app.post('/api/games/:gameId/rounds', isLoggedIn, async (req, res) => {
+  const gameId = req.params.gameId;
+  try {
+    // extract a new random card that has not been played yet
+    const newCards = await getRandomCardsForGame(gameId, 1);
+    if (!newCards || newCards.length === 0) {
+      return res.status(404).json({ error: 'No more cards available.' });
+    }
 
+    // Insert new card into GameCards
+    // newCards contains only one element, but is passed as an array for consistency
+    await addGameCards(gameId, newCards, req.body.roundId);
+
+    // return the new card
+    res.status(201).json(newCards[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
+// PUT /api/games/:gameId/rounds/:roundId
+app.patch('/api/games/:gameId/rounds/:roundId', isLoggedIn, [
+  check('insertIndex').isInt({ min: 0 })
+], async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.array() });
+  }
+
+  const { gameId, roundId } = req.params;
+  const { insertIndex } = req.body;
+
+  try {
+    const result = await evaluateGuess(gameId, roundId, insertIndex);
+    res.json(result); //{ correct: true/false }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+//TODO: finish routes (ex update game status)
 // activate the server
 app.listen(port, () => {
   console.log(`Server listening at http://localhost:${port}`);

@@ -143,7 +143,7 @@ export const getGameCards = (gameId) => {
   });
 };
 
-//add a list of cards to GameCards table
+//add a list of cards to GameCards table. They are inserted all with the same roundId
 export const addGameCards = (gameId, cards, roundId) => {
   return new Promise((resolve, reject) => {
     const sql = "INSERT INTO gameCards(gameId, cardId, roundId) VALUES (?, ?, ?)";
@@ -158,6 +158,58 @@ export const addGameCards = (gameId, cards, roundId) => {
     stmt.finalize((err) => {
       if (err) reject(err);
       else resolve();
+    });
+  });
+};
+
+//verifies if the guessed card is correct, updates GameCards and Game.correctGuesses
+export const evaluateGuessDAO = (gameId, roundId, insertIndex) => {
+  return new Promise((resolve, reject) => {
+    //find misfortune of the guessed card
+    const sqlGuessed = `
+      SELECT c.misfortune FROM gameCards gc
+      JOIN cards c ON gc.cardId = c.id
+      WHERE gc.gameId = ? AND gc.roundId = ?
+    `;
+
+    db.get(sqlGuessed, [gameId, roundId], (err, guessRow) => {
+      if (err || !guessRow) return reject(err || 'Guessed card not found');
+      const guessMisfortune = guessRow.misfortune;
+
+      //find the actual hand (starting cards + guessed cards)
+      const sqlHand = `
+        SELECT c.misfortune FROM gameCards gc
+        JOIN cards c ON gc.cardId = c.id
+        WHERE gc.gameId = ? AND (gc.roundId = 0 OR gc.guessedCorrectly = 1)
+        ORDER BY c.misfortune ASC
+      `;
+
+      db.all(sqlHand, [gameId], (err2, handRows) => {
+        if (err2) return reject(err2);
+        const hand = handRows.map(r => r.misfortune);
+
+        //if insertIndex > 0, left = misfortune of prev card, else -Infinity
+        const left = insertIndex > 0 ? hand[insertIndex - 1] : -Infinity;
+        const right = insertIndex < hand.length ? hand[insertIndex] : Infinity;
+
+        const correct = left <= guessMisfortune && guessMisfortune <= right;
+
+        const updateGameCardSQL = `UPDATE gameCards SET guessedCorrectly = ? WHERE gameId = ? AND roundId = ?`;
+
+        db.run(updateGameCardSQL, [correct ? 1 : 0, gameId, roundId], function (err3) {
+          if (err3) return reject(err3);
+
+          if (correct) {
+            const updateCorrectSQL = `UPDATE games SET correctGuesses = correctGuesses + 1 WHERE id = ?`;
+            db.run(updateCorrectSQL, [gameId], function (err4) {
+              if (err4) return reject(err4);
+              else resolve({ correct: true });
+            });
+          } else {
+            resolve({ correct: false });
+          }
+        });
+      });
     });
   });
 };

@@ -63,7 +63,7 @@ const createGame = async (game) => {
   }
 };
 
-//create a new round for a game
+// extract a new random card, insert it into GameCards, return the new card
 //POST /api/games/:gameId/rounds
 const createRound = async (gameId, round) => {
   const response = await fetch(SERVER_URL + `/api/games/${gameId}/rounds`, {
@@ -84,8 +84,28 @@ const createRound = async (gameId, round) => {
   }
 }
 
+//verifies if the guessed card is correct, updates GameCards and Game.correctGuesses
+//PUT /api/games/:gameId/rounds/:roundId
+export const updateRound = async (gameId, roundId, insertIndex) => {
+  const response = await fetch(`${SERVER_URL}/api/games/${gameId}/rounds/${roundId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify({ insertIndex })  //where the card was guessed
+  });
+
+  if (response.ok) {
+    return await response.json(); //{ correct: true/false }
+  } else {
+    const errDetails = await response.text();
+    throw errDetails;
+  }
+};
+
 //upadate a game
-//PATCH /api/games/:gameId
+//PUT /api/games/:gameId
 const updateGame = async (gameId, game) => {
   const response = await fetch(SERVER_URL + `/api/games/${gameId}`, {
     method: 'PATCH',
