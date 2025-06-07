@@ -39,7 +39,7 @@ const getRoundsOfGame = async (gameId) => {
     throw new Error("Internal server error");
 }
 
-//Create game
+//Create game, extract 3 initial random cards, insert them into GameCards, return the 3 cards + game
 //POST /api/games
 const createGame = async (game) => {
   const response = await fetch(SERVER_URL + '/api/games', {
@@ -47,20 +47,21 @@ const createGame = async (game) => {
     headers: {
       'Content-Type': 'application/json',
     },
-    credentials: 'include',
-    body: JSON.stringify(game),
+    body: JSON.stringify({userId: game.userId, startedAt: game.startedAt, correctGuesses: 0, status: game.status}),
+    credentials: 'include'
   });
-  if(response.ok) {
-    //TODO: check if create game should return the cards of the game
+
+  if (response.ok) {
     const gameJson = await response.json();
-    return new Game(gameJson.id, gameJson.userId, gameJson.startedAt, gameJson.correctGuesses, gameJson.status);
-  }
-  else {
-    //TODO: check if the error handle is correct
+    return {
+      game: new Game(gameJson.id, gameJson.userId, gameJson.startedAt, gameJson.correctGuesses, gameJson.status),
+      initialCards: gameJson.initialCards  //return also initial cards
+    };
+  } else {
     const errDetails = await response.text();
     throw errDetails;
   }
-}
+};
 
 //create a new round for a game
 //POST /api/games/:gameId/rounds

@@ -2,7 +2,7 @@
 import express from 'express';
 import morgan from 'morgan';
 import {check, validationResult} from 'express-validator';
-import {getGamesByUserId, getUser} from './dao.mjs';
+import {getGameCards, getGamesByUserId, getUser} from './dao.mjs';
 import cors from 'cors';
 
 import passport from 'passport';
@@ -71,7 +71,7 @@ app.get('/api/games/:id', async (req, res) => {
     if(game.error) {
       res.status(404).json(game);
     } else {
-      game.json(game);
+      res.json(game);
     }
   }
   catch {
@@ -80,12 +80,55 @@ app.get('/api/games/:id', async (req, res) => {
 });
 
 //GET /api/games/:gameId/rounds
-app.get('/api/games:gameId/rounds', (req, res) => {
-  listGamesByUserId(req.user.id)
-  .then(games => res.json(games))
-  .catch(() => res.status(500).end());
+app.get('/api/games/:gameId/rounds', async (req, res) => {
+  try{
+    const gameCards = await getGameCards(req.params.gameId);
+    if(gameCards.error) {
+      res.status(404).json(gameCards);
+    } else {
+      res.json(gameCards);
+    }
+  }catch (err) {
+    res.status(500).json({error: 'Internal server error'});
+  }
 });
-//TODO: finish routes
+
+//POST /api/games
+app.post("/api/games", isLoggedIn, [
+  check('userId').notEmpty(),
+  check('startedAt').isDate({format: 'YYYY-MM-DD', strictMode: true}),
+  check('correctGuesses').isNumeric(),
+  check('status').isIn(['ongoing', 'won', 'lost'])
+], async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.array() });
+  }
+
+  const gameData = req.body;
+
+  try {
+    const gameId = await addGame(gameData);
+
+    // extract 3 initial random cards
+    const initialCards = getRandomCardsForGame(gameId, 3);
+
+    // insert initial cards into GameCards
+    await addGameCards(gameId, initialCards, 0); //round 0 is for initial cards
+
+    // returns game + initial cards
+    res.status(201).json({
+      id: gameId,
+      ...gameData, //expand game data into the response
+      initialCards
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 
 // activate the server
 app.listen(port, () => {

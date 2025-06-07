@@ -42,6 +42,22 @@ export const getCard = (id) => {
   });
 };
 
+//select random cards (#cards generated = limit) that are not already been selected
+export const getRandomCardsForGame = (gameId, limit) => {
+  return new Promise((resolve, reject) => {
+    const sql = `
+      SELECT * FROM cards
+      WHERE id NOT IN (
+        SELECT cardId FROM gameCards WHERE gameId = ?
+      )
+      ORDER BY RANDOM() LIMIT ?`;
+    db.all(sql, [gameId, limit], (err, rows) => {
+      if (err) reject(err);
+      else resolve(rows);
+    });
+  });
+};
+
 /**  GAMES **/
 //get all the games of the user by its user id
 export const listGamesByUserId = (userId) => {
@@ -89,10 +105,10 @@ export const getGame = (id) => {
 export const addGame = (game) => {
   return new Promise((resolve, reject) => {
     const sql =
-      "INSERT INTO games(id, userId, startedAt, correctGuesses, status) VALUES (?,?,?,?,?)";
+      "INSERT INTO games(userId, startedAt, correctGuesses, status) VALUES (?,?,?,?)";
     db.run(
       sql,
-      [game.id, game.userId, game.startedAt, game.correctGuesses, game.status],
+      [game.userId, game.startedAt, game.correctGuesses, game.status],
       function (err) {
         if (err) reject(err);
         else resolve(this.lastID);
@@ -101,8 +117,52 @@ export const addGame = (game) => {
   });
 };
 
+
 /** GAMES CARDS **/
-//TODO: implement functions for GamesCards
+export const getGameCards = (gameId) => {
+  return new Promise((resolve, reject) => {
+    const sql = "SELECT * FROM gameCards WHERE gameCards.gameId = ?";
+    db.all(sql, [gameId], (err, rows) => {
+      if (err) {
+        reject(err);
+      } else if (rows.length === 0) {
+        resolve({ error: "No rounds found for this game." });
+      } else {
+        const gameCards = rows.map(
+          (gc) =>
+            new GameCards(
+              gc.gameId,
+              gc.cardId,
+              gc.roundId,
+              gc.guessedCorrectly
+            )
+        );
+        resolve(gameCards);
+      }
+    });
+  });
+};
+
+//add a list of cards to GameCards table
+export const addGameCards = (gameId, cards, roundId) => {
+  return new Promise((resolve, reject) => {
+    const sql = "INSERT INTO gameCards(gameId, cardId, roundId) VALUES (?, ?, ?)";
+    const stmt = db.prepare(sql); //prepare-> prepares the SQL statement for execution
+    //you can run stmt with .run, passing different parameters each time
+
+    for (const card of cards) {
+      stmt.run([gameId, card.id, roundId]);
+    }
+
+    //finalize closes stmt, after that it cannot be used anymore. It avoids memory leaks
+    stmt.finalize((err) => {
+      if (err) reject(err);
+      else resolve();
+    });
+  });
+};
+
+
 /** USERS **/
 //get user
 export const getUser = (email, password) => {
