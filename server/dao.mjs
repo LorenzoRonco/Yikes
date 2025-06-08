@@ -35,7 +35,7 @@ export const getCard = (id) => {
         resolve({ error: "Card not available, check the inserted id." });
       } else {
         resolve(
-          new Question(row.id, row.text, row.email, row.authorId, row.date)
+          new Card(c.id, c.title, c.imageUrl, c.misfortune)
         );
       }
     });
@@ -93,7 +93,7 @@ export const getGame = (id) => {
             row.userId,
             row.startedAt,
             row.correctGuesses,
-            rwo.status
+            row.status
           )
         );
       }
@@ -114,6 +114,23 @@ export const addGame = (game) => {
         else resolve(this.lastID);
       }
     );
+  });
+};
+
+//update a game
+export const updateGameStatus = (gameId, newStatus) => {
+  return new Promise((resolve, reject) => {
+    const sql = `UPDATE games SET status = ? WHERE id = ?`;
+    db.run(sql, [newStatus, gameId], function (err) {
+      if (err) return reject(err);
+
+      //return the updated game
+      const getSql = `SELECT * FROM games WHERE id = ?`;
+      db.get(getSql, [gameId], (err2, row) => {
+        if (err2) return reject(err2);
+        resolve(row);
+      });
+    });
   });
 };
 
@@ -165,6 +182,16 @@ export const addGameCards = (gameId, cards, roundId) => {
 //verifies if the guessed card is correct, updates GameCards and Game.correctGuesses
 export const evaluateGuessDAO = (gameId, roundId, insertIndex) => {
   return new Promise((resolve, reject) => {
+    //if insertIndex==null or undefined, it means the user did not guess any card in time
+    if (insertIndex === null || insertIndex === undefined) {
+      const updateSQL = `UPDATE gameCards SET guessedCorrectly = 0 WHERE gameId = ? AND roundId = ?`;
+      db.run(updateSQL, [gameId, roundId], function (err) {
+        if (err) return reject(err);
+        resolve({ correct: false }); //wrong answer
+      });
+      return;
+    }
+
     //find misfortune of the guessed card
     const sqlGuessed = `
       SELECT c.misfortune FROM gameCards gc
@@ -193,7 +220,7 @@ export const evaluateGuessDAO = (gameId, roundId, insertIndex) => {
         const right = insertIndex < hand.length ? hand[insertIndex] : Infinity;
 
         const correct = left <= guessMisfortune && guessMisfortune <= right;
-
+      
         const updateGameCardSQL = `UPDATE gameCards SET guessedCorrectly = ? WHERE gameId = ? AND roundId = ?`;
 
         db.run(updateGameCardSQL, [correct ? 1 : 0, gameId, roundId], function (err3) {

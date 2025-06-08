@@ -154,7 +154,7 @@ app.post('/api/games/:gameId/rounds', isLoggedIn, async (req, res) => {
 
 // PUT /api/games/:gameId/rounds/:roundId
 app.patch('/api/games/:gameId/rounds/:roundId', isLoggedIn, [
-  check('insertIndex').isInt({ min: 0 })
+  check('insertIndex').optional({ nullable: true }).isInt({ min: 0 }) //optional per permettere di mettere un indice nullo
 ], async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -173,7 +173,29 @@ app.patch('/api/games/:gameId/rounds/:roundId', isLoggedIn, [
   }
 });
 
-//TODO: finish routes (ex update game status)
+
+//PUT /api/games/:gameId
+app.patch('/api/games/:gameId', isLoggedIn, [
+  check('status').isIn(['ongoing', 'won', 'lost'])
+], async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.array() });
+  }
+
+  const { status } = req.body;
+  const gameId = req.params.gameId;
+
+  try {
+    const updatedGame = await updateGameStatus(gameId, status);
+    res.json(updatedGame);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
 // activate the server
 app.listen(port, () => {
   console.log(`Server listening at http://localhost:${port}`);

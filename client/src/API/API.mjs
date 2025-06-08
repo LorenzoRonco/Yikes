@@ -2,7 +2,7 @@ import { Card, Game, GameCards } from "../models/GCModels.mjs";
 
 const SERVER_URL = "http://localhost:3001";
 
-
+//TODO: aggiorna queste funzioni, perchè non si adattano al GCModels lato client e non restituiscono le cards
 //Get all games
 //GET /api/games
 const getGames = async () => {
@@ -63,7 +63,7 @@ const createGame = async (game) => {
   }
 };
 
-// extract a new random card, insert it into GameCards, return the new card
+//extract a new random card, insert it into GameCards, return the new card
 //POST /api/games/:gameId/rounds
 const createRound = async (gameId, round) => {
   const response = await fetch(SERVER_URL + `/api/games/${gameId}/rounds`, {
@@ -167,5 +167,5 @@ const logOut = async() => {
     return null;
 }
 
-const API = {getGames, getGame, getRoundsOfGame, createGame, createRound, updateGame, logIn, getUserInfo, logOut };
+const API = {getGames, getGame, getRoundsOfGame, createGame, createRound, updateRound, updateGame, logIn, getUserInfo, logOut };
 export default API;
