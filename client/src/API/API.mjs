@@ -2,7 +2,9 @@ import { Card, Game, GameCards } from "../models/GCModels.mjs";
 
 const SERVER_URL = "http://localhost:3001";
 
-//TODO: aggiorna queste funzioni, perchè non si adattano al GCModels lato client e non restituiscono le cards
+//TODO: aggiorna API per adattarle a frontend
+
+
 //Get all games
 //GET /api/games
 const getGames = async () => {
@@ -55,7 +57,7 @@ const createGame = async (game) => {
     const gameJson = await response.json();
     return {
       game: new Game(gameJson.id, gameJson.userId, gameJson.startedAt, gameJson.correctGuesses, gameJson.status),
-      initialCards: gameJson.initialCards  //return also initial cards
+      initialCards: gameJson.initialCards.map(g => Card(g.id, g.title, g.imageUrl, g.misfortune))  //return also initial cards
     };
   } else {
     const errDetails = await response.text();
@@ -75,8 +77,8 @@ const createRound = async (gameId, round) => {
     body: JSON.stringify(round),
   });
   if(response.ok) {
-    const gameCardsJson = await response.json();
-    return new GameCards(gameCardsJson.gameId, gameCardsJson.cardId, gameCardsJson.roundId, gameCardsJson.guessedCorrectly);
+    const cardJson = await response.json();
+    return new Card(cardJson.id, cardJson.title, cardJson.imageUrl, cardJson.misfortune);
   }
   else {
     const errDetails = await response.text();
