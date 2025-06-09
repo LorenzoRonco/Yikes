@@ -34,9 +34,7 @@ export const getCard = (id) => {
       } else if (row === undefined) {
         resolve({ error: "Card not available, check the inserted id." });
       } else {
-        resolve(
-          new Card(c.id, c.title, c.imageUrl, c.misfortune)
-        );
+        resolve(new Card(c.id, c.title, c.imageUrl, c.misfortune));
       }
     });
   });
@@ -64,8 +62,7 @@ export const listGamesByUserId = (userId) => {
   return new Promise((resolve, reject) => {
     const sql = "SELECT * FROM games WHERE user.Id = ?";
     db.get(sql, [userId], (err, rows) => {
-      if (err) 
-        reject(err);
+      if (err) reject(err);
       else {
         const games = rows.map(
           (g) =>
@@ -134,7 +131,6 @@ export const updateGameStatus = (gameId, newStatus) => {
   });
 };
 
-
 /** GAMES CARDS **/
 export const getGameCards = (gameId) => {
   return new Promise((resolve, reject) => {
@@ -147,12 +143,7 @@ export const getGameCards = (gameId) => {
       } else {
         const gameCards = rows.map(
           (gc) =>
-            new GameCards(
-              gc.gameId,
-              gc.cardId,
-              gc.roundId,
-              gc.guessedCorrectly
-            )
+            new GameCards(gc.gameId, gc.cardId, gc.roundId, gc.guessedCorrectly)
         );
         resolve(gameCards);
       }
@@ -163,7 +154,8 @@ export const getGameCards = (gameId) => {
 //add a list of cards to GameCards table. They are inserted all with the same roundId
 export const addGameCards = (gameId, cards, roundId) => {
   return new Promise((resolve, reject) => {
-    const sql = "INSERT INTO gameCards(gameId, cardId, roundId) VALUES (?, ?, ?)";
+    const sql =
+      "INSERT INTO gameCards(gameId, cardId, roundId) VALUES (?, ?, ?)";
     const stmt = db.prepare(sql); //prepare-> prepares the SQL statement for execution
     //you can run stmt with .run, passing different parameters each time
 
@@ -180,7 +172,7 @@ export const addGameCards = (gameId, cards, roundId) => {
 };
 
 //verifies if the guessed card is correct, updates GameCards and Game.correctGuesses
-export const evaluateGuessDAO = (gameId, roundId, insertIndex) => {
+export const evaluateGuess = (gameId, roundId, insertIndex) => {
   return new Promise((resolve, reject) => {
     //if insertIndex==null or undefined, it means the user did not guess any card in time
     if (insertIndex === null || insertIndex === undefined) {
@@ -200,7 +192,7 @@ export const evaluateGuessDAO = (gameId, roundId, insertIndex) => {
     `;
 
     db.get(sqlGuessed, [gameId, roundId], (err, guessRow) => {
-      if (err || !guessRow) return reject(err || 'Guessed card not found');
+      if (err || !guessRow) return reject(err || "Guessed card not found");
       const guessMisfortune = guessRow.misfortune;
 
       //find the actual hand (starting cards + guessed cards)
@@ -213,40 +205,43 @@ export const evaluateGuessDAO = (gameId, roundId, insertIndex) => {
 
       db.all(sqlHand, [gameId], (err2, handRows) => {
         if (err2) return reject(err2);
-        const hand = handRows.map(r => r.misfortune);
+        const hand = handRows.map((r) => r.misfortune);
 
         //if insertIndex > 0, left = misfortune of prev card, else -Infinity
         const left = insertIndex > 0 ? hand[insertIndex - 1] : -Infinity;
         const right = insertIndex < hand.length ? hand[insertIndex] : Infinity;
 
         const correct = left <= guessMisfortune && guessMisfortune <= right;
-      
+
         const updateGameCardSQL = `UPDATE gameCards SET guessedCorrectly = ? WHERE gameId = ? AND roundId = ?`;
 
-        db.run(updateGameCardSQL, [correct ? 1 : 0, gameId, roundId], function (err3) {
-          if (err3) return reject(err3);
+        db.run(
+          updateGameCardSQL,
+          [correct ? 1 : 0, gameId, roundId],
+          function (err3) {
+            if (err3) return reject(err3);
 
-          if (correct) {
-            const updateCorrectSQL = `UPDATE games SET correctGuesses = correctGuesses + 1 WHERE id = ?`;
-            db.run(updateCorrectSQL, [gameId], function (err4) {
-              if (err4) return reject(err4);
-              else resolve({ correct: true });
-            });
-          } else {
-            resolve({ correct: false });
+            if (correct) {
+              const updateCorrectSQL = `UPDATE games SET correctGuesses = correctGuesses + 1 WHERE id = ?`;
+              db.run(updateCorrectSQL, [gameId], function (err4) {
+                if (err4) return reject(err4);
+                else resolve({ correct: true });
+              });
+            } else {
+              resolve({ correct: false });
+            }
           }
-        });
+        );
       });
     });
   });
 };
 
-
 /** USERS **/
 //get user
 export const getUser = (email, password) => {
   return new Promise((resolve, reject) => {
-    const sql = "SELECT * FROM user WHERE email = ?";
+    const sql = "SELECT * FROM users WHERE email = ?";
     db.get(sql, [email], (err, row) => {
       if (err) {
         reject(err);

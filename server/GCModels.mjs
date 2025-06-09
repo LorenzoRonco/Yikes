@@ -1,4 +1,4 @@
-import dayjs from 'dayjs';
+import dayjs from "dayjs";
 
 function Card(id, title, imageUrl, misfortune) {
   this.id = id;
@@ -15,11 +15,11 @@ function Game(id, userId, startedAt, correctGuesses, status) {
   this.status = status;
 }
 
-function GameCards(gameId, cardId, roundId, guessedCorrectly){
-    this.gameId = gameId;
-    this.cardId = cardId;
-    this.roundId = roundId;
-    this.guessedCorrectly = guessedCorrectly;
+function GameCards(gameId, cardId, roundId, guessedCorrectly) {
+  this.gameId = gameId;
+  this.cardId = cardId;
+  this.roundId = roundId;
+  this.guessedCorrectly = guessedCorrectly;
 }
 
 export { Card, Game, GameCards };
