@@ -6,6 +6,7 @@ import { Routes, Route, Navigate } from "react-router";
 import { LoginForm } from "./components/AuthComponents";
 import NotFound from "./components/NotFound";
 import API from "./API/API.mjs";
+import GamePage from "./components/GamePage";
 
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -18,7 +19,7 @@ function App() {
         const user = await API.getUserInfo();
         setLoggedIn(true);
         setUser(user);
-      } catch (err) {
+      } catch {
         setLoggedIn(false);
         setUser(null);
         setMessage({ msg: "You are not logged in", type: "danger" });
@@ -47,28 +48,11 @@ function App() {
 
   return (
     <Routes>
-      <Route
-        element={
-          <DefaultLayout
-            loggedIn={loggedIn}
-            handleLogout={handleLogout}
-            message={message}
-            setMessage={setMessage}
-          />
-        }
-      >
+      <Route element={<DefaultLayout loggedIn={loggedIn} handleLogout={handleLogout} message={message} setMessage={setMessage} />}>
         <Route path="/" element={<Home user={user} />} />
+        <Route path="/games/:gameId" element={<GamePage user={user}/>}></Route>
       </Route>
-      <Route
-        path="/login"
-        element={
-          loggedIn ? (
-            <Navigate replace to="/" />
-          ) : (
-            <LoginForm handleLogin={handleLogin} />
-          )
-        }
-      />
+      <Route path="/login" element={loggedIn ? (<Navigate replace to="/" />) : (<LoginForm handleLogin={handleLogin} />)} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

@@ -37,6 +37,10 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
+app.use('/static', express.static('public')); //for cards images
+// you can access a file using http://localhost:3001/static/{filename}
+// if the file is in a directory you have to specify the full path
+
 passport.use(
   new LocalStrategy(async function verify(username, password, cb) {
     const user = await getUser(username, password);
@@ -113,9 +117,9 @@ app.post(
   isLoggedIn,
   [
     check("userId").notEmpty(),
-    check("startedAt").isDate({ format: "YYYY-MM-DD", strictMode: true }),
-    check("correctGuesses").isNumeric(),
-    check("status").isIn(["ongoing", "won", "lost"]),
+    check("startedAt").isISO8601(),
+    check("correctGuesses").custom(value => Number(value) === 0), //ensure correctGuesses is 0
+    check("status").isIn(["ongoing"]), //a new game can not be already won or lost
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -129,7 +133,7 @@ app.post(
       const gameId = await addGame(gameData);
 
       // extract 3 initial random cards
-      const initialCards = getRandomCardsForGame(gameId, 3);
+      const initialCards = await getRandomCardsForGame(gameId, 3);
 
       // insert initial cards into GameCards
       await addGameCards(gameId, initialCards, 0); //round 0 is for initial cards
@@ -152,6 +156,7 @@ app.post("/api/games/:gameId/rounds", isLoggedIn, async (req, res) => {
   const gameId = req.params.gameId;
   try {
     // extract a new random card that has not been played yet
+    //the cards are sent without the misfortune, so client cannot cheat
     const newCards = await getRandomCardsForGame(gameId, 1);
     if (!newCards || newCards.length === 0) {
       return res.status(404).json({ error: "No more cards available." });

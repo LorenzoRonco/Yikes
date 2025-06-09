@@ -73,7 +73,7 @@ const createGame = async (game) => {
         gameJson.status
       ),
       initialCards: gameJson.initialCards.map((g) =>
-        Card(g.id, g.title, g.imageUrl, g.misfortune)
+        new Card(g.id, g.title, g.imageUrl, g.misfortune)
       ), //return also initial cards
     };
   } else {
@@ -99,7 +99,6 @@ const createRound = async (gameId, round) => {
       cardJson.id,
       cardJson.title,
       cardJson.imageUrl,
-      cardJson.misfortune
     );
   } else {
     const errDetails = await response.text();

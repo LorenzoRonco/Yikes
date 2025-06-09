@@ -17,7 +17,7 @@ function LoginForm(props) {
     try {
       await props.handleLogin(credentials);
       return { success: true };
-    } catch (error) {
+    } catch {
       return { error: "Login failed. Check your credentials." };
     }
   }
@@ -67,6 +67,7 @@ function LoginForm(props) {
 }
 
 function LogoutButton(props) {
+  
   return (
     <Button variant="outline-light" onClick={props.logout}>
       Logout
