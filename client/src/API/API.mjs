@@ -206,5 +206,6 @@ const API = {
   logIn,
   getUserInfo,
   logOut,
+  SERVER_URL, // Export the server URL if needed elsewhere
 };
 export default API;

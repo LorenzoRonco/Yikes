@@ -167,7 +167,9 @@ app.post("/api/games/:gameId/rounds", isLoggedIn, async (req, res) => {
     await addGameCards(gameId, newCards, req.body.roundId);
 
     // return the new card
-    res.status(201).json(newCards[0]);
+    // removes the misfortune before sending it to the client so client cannot cheat
+    const { misfortune, ...safeCard } = newCards[0];
+    res.status(201).json(safeCard);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Internal server error" });
@@ -175,6 +177,7 @@ app.post("/api/games/:gameId/rounds", isLoggedIn, async (req, res) => {
 });
 
 // PUT /api/games/:gameId/rounds/:roundId
+//TODO: modificala in modo da ritornare la carta che si è tentato di indovinare, perchè lato frontend ti servirà il misfortune
 app.patch(
   "/api/games/:gameId/rounds/:roundId",
   isLoggedIn,

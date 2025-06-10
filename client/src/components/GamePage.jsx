@@ -59,8 +59,7 @@ function GamePage() {
           <Row className="mb-4">
             <Col xs={12} md={4}>
               <Card>
-                //TODO: é giusto passare così le immagini?
-                <Card.Img variant="top" src={`http://localhost:3001/static/1.png`} alt={newCard.title} />
+                <Card.Img variant="top" src={API.SERVER_URL+newCard.imageUrl} alt={newCard.title} />
                 <Card.Body>
                   <Card.Title>{newCard.title}</Card.Title>
                 </Card.Body>
@@ -70,15 +69,17 @@ function GamePage() {
         </>
       )}
 
-      {/* CARTE INIZIALI */}
-      <h4>Carte Iniziali</h4>
+      {/* CARTE INIZIALI 
+      //TODO: devi rifarlo anche quando la carta viene indovinata perchè sarà aggiunta alla mano */}
+      
+      <h4>Mano del giocatore</h4>
       <Row>
-        {initialCards.map((card) => (
+        {initialCards.sort((c1,c2) => c1.misfortune-c2.misfortune).map((card) => (
           <Col key={card.id} xs={12} md={4} className="mb-3">
             <Card>
-              <Card.Img variant="top" src={card.imageUrl} alt={card.title} />
+              <Card.Img variant="top" src={API.SERVER_URL+card.imageUrl} alt={card.title} />
               <Card.Body>
-                <Card.Title>{card.title}</Card.Title>
+                <Card.Title>{card.title} - misfortune: {card.misfortune}</Card.Title>
               </Card.Body>
             </Card>
           </Col>

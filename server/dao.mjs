@@ -43,10 +43,8 @@ export const getCard = (id) => {
 //select random cards (#cards generated = limit) that are not already been selected
 export const getRandomCardsForGame = (gameId, limit) => {
   return new Promise((resolve, reject) => {
-    //misfortune is not selected in order to not passing it to the client,
-    //avoiding the user to cheat using the console on the browser
     const sql = `
-      SELECT cards.id, cards.title, cards.imageUrl FROM cards
+      SELECT * FROM cards
       WHERE id NOT IN (
         SELECT cardId FROM gameCards WHERE gameId = ?
       )
