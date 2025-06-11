@@ -105,7 +105,7 @@ const createRound = async (gameId, round) => {
     throw errDetails;
   }
 };
-
+//TODO: aggiungi una API per controllare se utente ha vinto o perso il GIOCO, oppure modifica updateGame per farlo
 //verifies if the guessed card is correct, updates GameCards and Game.correctGuesses
 //PUT /api/games/:gameId/rounds/:roundId
 export const updateRound = async (gameId, roundId, insertIndex) => {
@@ -122,14 +122,14 @@ export const updateRound = async (gameId, roundId, insertIndex) => {
   );
 
   if (response.ok) {
-    return await response.json(); //{ correct: true/false }
+    return await response.json(); //{ correct: true/false, hand, cardGuessed}
   } else {
     const errDetails = await response.text();
     throw errDetails;
   }
 };
 
-//upadate a game
+//update a game
 //PUT /api/games/:gameId
 const updateGame = async (gameId, game) => {
   const response = await fetch(SERVER_URL + `/api/games/${gameId}`, {

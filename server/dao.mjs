@@ -174,30 +174,20 @@ export const addGameCards = (gameId, cards, roundId) => {
 //verifies if the guessed card is correct, updates GameCards and Game.correctGuesses
 export const evaluateGuess = (gameId, roundId, insertIndex) => {
   return new Promise((resolve, reject) => {
-    //if insertIndex==null or undefined, it means the user did not guess any card in time
-    if (insertIndex === null || insertIndex === undefined) {
-      const updateSQL = `UPDATE gameCards SET guessedCorrectly = 0 WHERE gameId = ? AND roundId = ?`;
-      db.run(updateSQL, [gameId, roundId], function (err) {
-        if (err) return reject(err);
-        resolve({ correct: false }); //wrong answer
-      });
-      return;
-    }
-
-    //find misfortune of the guessed card
+    //find the guessed card
     const sqlGuessed = `
-      SELECT c.misfortune FROM gameCards gc
+      SELECT * FROM gameCards gc
       JOIN cards c ON gc.cardId = c.id
       WHERE gc.gameId = ? AND gc.roundId = ?
     `;
 
     db.get(sqlGuessed, [gameId, roundId], (err, guessRow) => {
       if (err || !guessRow) return reject(err || "Guessed card not found");
-      const guessMisfortune = guessRow.misfortune;
+      const guessCard = guessRow;
 
       //find the actual hand (starting cards + guessed cards)
       const sqlHand = `
-        SELECT c.misfortune FROM gameCards gc
+        SELECT * FROM gameCards gc
         JOIN cards c ON gc.cardId = c.id
         WHERE gc.gameId = ? AND (gc.roundId = 0 OR gc.guessedCorrectly = 1)
         ORDER BY c.misfortune ASC
@@ -205,13 +195,24 @@ export const evaluateGuess = (gameId, roundId, insertIndex) => {
 
       db.all(sqlHand, [gameId], (err2, handRows) => {
         if (err2) return reject(err2);
-        const hand = handRows.map((r) => r.misfortune);
+        let hand = handRows;
+
+        
+        //if insertIndex==null or undefined, it means the user did not guess any card in time
+        if (insertIndex === null || insertIndex === undefined) {
+          const updateSQL = `UPDATE gameCards SET guessedCorrectly = 0 WHERE gameId = ? AND roundId = ?`;
+          db.run(updateSQL, [gameId, roundId], function (err3) {
+            if (err3) return reject(err3);
+            resolve({ correct: false, hand: hand, guessCard: guessCard });
+          });
+          return;
+        }
 
         //if insertIndex > 0, left = misfortune of prev card, else -Infinity
-        const left = insertIndex > 0 ? hand[insertIndex - 1] : -Infinity;
-        const right = insertIndex < hand.length ? hand[insertIndex] : Infinity;
+        const left = insertIndex > 0 ? hand[insertIndex - 1].misfortune : -Infinity;
+        const right = insertIndex < hand.length ? hand[insertIndex].misfortune : Infinity;
 
-        const correct = left <= guessMisfortune && guessMisfortune <= right;
+        const correct = left <= guessCard.misfortune && guessCard.misfortune <= right;
 
         const updateGameCardSQL = `UPDATE gameCards SET guessedCorrectly = ? WHERE gameId = ? AND roundId = ?`;
 
@@ -225,10 +226,14 @@ export const evaluateGuess = (gameId, roundId, insertIndex) => {
               const updateCorrectSQL = `UPDATE games SET correctGuesses = correctGuesses + 1 WHERE id = ?`;
               db.run(updateCorrectSQL, [gameId], function (err4) {
                 if (err4) return reject(err4);
-                else resolve({ correct: true });
+                else {
+                  hand.push(guessCard); //add guessed card to the hand
+                  hand.sort((a, b) => a.misfortune - b.misfortune); //sort the hand by misfortune
+                  resolve({ correct: true, hand: hand, guessCard: guessCard});
+                }
               });
             } else {
-              resolve({ correct: false });
+              resolve({ correct: false, hand: hand, guessCard: guessCard });
             }
           }
         );

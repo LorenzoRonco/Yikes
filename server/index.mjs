@@ -177,7 +177,6 @@ app.post("/api/games/:gameId/rounds", isLoggedIn, async (req, res) => {
 });
 
 // PUT /api/games/:gameId/rounds/:roundId
-//TODO: modificala in modo da ritornare la carta che si è tentato di indovinare, perchè lato frontend ti servirà il misfortune
 app.patch(
   "/api/games/:gameId/rounds/:roundId",
   isLoggedIn,
@@ -195,7 +194,7 @@ app.patch(
 
     try {
       const result = await evaluateGuess(gameId, roundId, insertIndex);
-      res.json(result); //{ correct: true/false }
+      res.json(result); //{ correct: true/false, hand, cardGuessed}
     } catch (err) {
       console.error(err);
       res.status(500).json({ error: "Internal server error" });
