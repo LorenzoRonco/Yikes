@@ -129,16 +129,15 @@ export const updateRound = async (gameId, roundId, insertIndex) => {
   }
 };
 
-//update a game
+//update a game, it automatically computes the status of the game and returns it
 //PUT /api/games/:gameId
-const updateGame = async (gameId, game) => {
+const updateGame = async (gameId) => {
   const response = await fetch(SERVER_URL + `/api/games/${gameId}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
     },
-    credentials: "include",
-    body: JSON.stringify(game),
+    credentials: "include"
   });
   if (response.ok) {
     const gameJson = await response.json();

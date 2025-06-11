@@ -115,17 +115,51 @@ export const addGame = (game) => {
 };
 
 //update a game
-export const updateGameStatus = (gameId, newStatus) => {
+export const updateGameStatus = (gameId) => {
   return new Promise((resolve, reject) => {
-    const sql = `UPDATE games SET status = ? WHERE id = ?`;
-    db.run(sql, [newStatus, gameId], function (err) {
+    //find the actual hand (starting cards + guessed cards)
+    const sqlHand = `
+      SELECT * FROM gameCards gc
+      JOIN cards c ON gc.cardId = c.id
+      WHERE gc.gameId = ? AND (gc.roundId = 0 OR gc.guessedCorrectly = 1)
+      ORDER BY c.misfortune ASC
+    `;
+
+    //count #wrong guesses
+    const sqlWrongGuesses = `
+      SELECT COUNT(*) as wrongGuesses FROM gameCards
+      WHERE gameId = ? AND guessedCorrectly = 0 AND roundId > 0
+    `;
+
+    db.all(sqlHand, [gameId], (err, handRows) => {
       if (err) return reject(err);
 
-      //return the updated game
-      const getSql = `SELECT * FROM games WHERE id = ?`;
-      db.get(getSql, [gameId], (err2, row) => {
+      db.get(sqlWrongGuesses, [gameId], (err2, countRow) => {
         if (err2) return reject(err2);
-        resolve(row);
+
+        const handSize = handRows.length;
+        const wrongGuesses = countRow.wrongGuesses;
+
+        //change status
+        let newStatus = 'ongoing';
+        if (handSize >= 6) {
+          newStatus = 'won';
+        } else if (wrongGuesses >= 3) {
+          newStatus = 'lost';
+        }
+
+        //update game
+        const sql = `UPDATE games SET status = ? WHERE id = ?`;
+        db.run(sql, [newStatus, gameId], function (err3) {
+          if (err3) return reject(err3);
+          
+          // return the updated game
+          const getSql = `SELECT * FROM games WHERE id = ?`;
+          db.get(getSql, [gameId], (err4, row) => {
+            if (err4) return reject(err4);
+            resolve(row);
+          });
+        });
       });
     });
   });

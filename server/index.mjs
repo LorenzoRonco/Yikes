@@ -181,7 +181,7 @@ app.patch(
   "/api/games/:gameId/rounds/:roundId",
   isLoggedIn,
   [
-    check("insertIndex").optional({ nullable: true }).isInt({ min: 0 }), //optional per permettere di mettere un indice nullo
+    check("insertIndex").optional({ nullable: true }).isInt({ min: 0 }), //optional so I can insert a null index (for initial cards)
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -206,18 +206,11 @@ app.patch(
 app.patch(
   "/api/games/:gameId",
   isLoggedIn,
-  [check("status").isIn(["ongoing", "won", "lost"])],
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(422).json({ errors: errors.array() });
-    }
-
-    const { status } = req.body;
     const gameId = req.params.gameId;
 
     try {
-      const updatedGame = await updateGameStatus(gameId, status);
+      const updatedGame = await updateGameStatus(gameId);
       res.json(updatedGame);
     } catch (err) {
       console.error(err);
