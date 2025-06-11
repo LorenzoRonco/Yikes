@@ -96,7 +96,7 @@ function NotLoggedInHome() {
       <Row className="mt-3">
         <Col>
           <Link
-            to="/demo"
+            to="/games/demo"
             className="btn btn-info"
             style={{
               textDecoration: "none",

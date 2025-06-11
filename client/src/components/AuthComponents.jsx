@@ -67,7 +67,6 @@ function LoginForm(props) {
 }
 
 function LogoutButton(props) {
-  
   return (
     <Button variant="outline-light" onClick={props.logout}>
       Logout

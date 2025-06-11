@@ -2,7 +2,6 @@ import { Card, Game, GameCards } from "../models/GCModels.mjs";
 
 const SERVER_URL = "http://localhost:3001";
 
-//TODO: aggiorna API per adattarle a frontend
 
 //Get all games
 //GET /api/games
@@ -105,7 +104,7 @@ const createRound = async (gameId, round) => {
     throw errDetails;
   }
 };
-//TODO: aggiungi una API per controllare se utente ha vinto o perso il GIOCO, oppure modifica updateGame per farlo
+//TODO: modifica API per validazione timer
 //verifies if the guessed card is correct, updates GameCards and Game.correctGuesses
 //PUT /api/games/:gameId/rounds/:roundId
 export const updateRound = async (gameId, roundId, insertIndex) => {

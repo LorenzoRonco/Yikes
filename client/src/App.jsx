@@ -4,6 +4,7 @@ import Home from "./components/Home";
 import DefaultLayout from "./components/DefaultLayout";
 import { Routes, Route, Navigate } from "react-router";
 import { LoginForm } from "./components/AuthComponents";
+import DemoGame from "./components/DemoGame";
 import NotFound from "./components/NotFound";
 import API from "./API/API.mjs";
 import GamePage from "./components/GamePage";
@@ -52,6 +53,7 @@ function App() {
       <Route element={<DefaultLayout loggedIn={loggedIn} handleLogout={handleLogout} message={message} setMessage={setMessage} />}>
         <Route path="/" element={<Home user={user} />} />
         <Route path="/games/:gameId" element={<GamePage user={user}/>}></Route>
+        <Route path="/games/demo" element={<DemoGame user={user}/>}></Route>
       </Route>
       <Route path="/login" element={loggedIn ? (<Navigate replace to="/" />) : (<LoginForm handleLogin={handleLogin} />)} />
       <Route path="*" element={<NotFound />} />
