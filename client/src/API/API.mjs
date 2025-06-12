@@ -19,10 +19,14 @@ const getCard = async (cardId) => {
 
 //Get all games of logged user
 //GET /api/games
-export const getGameHistory = async () => {
-  const response = await fetch(`${SERVER_URL}/api/games`);
-  if (!response.ok) throw new Error("Failed to fetch game history");
-  return await response.json();
+export const getGamesHistory = async () => {
+  const response = await fetch(SERVER_URL + `/api/games`, {
+    credentials: "include",
+  });
+  if (response.ok) 
+    return await response.json();
+  else
+    throw new Error("Failed to fetch game history");
 };
 
 //Get single game
@@ -251,7 +255,7 @@ const logOut = async () => {
 
 const API = {
   getCard,
-  getGames,
+  getGamesHistory,
   getGame,
   getRoundsOfGame,
   createGame,

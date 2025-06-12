@@ -73,10 +73,15 @@ export const getRandomCards = (limit) => {
 //get all the games of the user by its user id
 export const listGamesByUserId = (userId) => {
   return new Promise((resolve, reject) => {
-    const sql = "SELECT * FROM games WHERE userId = ? AND status IN ('won', 'lost')"; //discard ongoing games
-    db.get(sql, [userId], (err, rows) => {
+    const sql = `SELECT * FROM games 
+    WHERE userId = ? 
+    AND status IN ('won', 'lost') 
+    ORDER BY startedAt DESC`;
+    // Ensure db.all is used here:
+    db.all(sql, [userId], (err, rows) => {
       if (err) reject(err);
       else {
+        // If no games are found, rows will be an empty array, which is iterable.
         const games = rows.map(
           (g) =>
             new Game(g.id, g.userId, g.startedAt, g.correctGuesses, g.status)

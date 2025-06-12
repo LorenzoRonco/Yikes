@@ -99,7 +99,9 @@ app.get("/api/cards/:cardId", async (req, res) => {
 });
 
 // GET /api/games
-app.get("/api/games", async (req, res) => {
+app.get("/api/games", 
+  isLoggedIn,
+  async (req, res) => {
   try {
     const games = await listGamesByUserId(req.user.id);
 
