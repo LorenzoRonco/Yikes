@@ -8,6 +8,7 @@ import { useState } from "react";
 import API from "../API/API.mjs";
 import dayjs from "dayjs";
 
+
 function Home(props) {
   return (
     <>
@@ -58,24 +59,20 @@ function LoggedInHome(props) {
       </Row>
       <Row className="mt-3">
         <Col>
-          <Link
-            to="/game"
+          <button
+            onClick={handleNewGame}
             className="btn btn-info"
             style={{
-              textDecoration: "none",
               padding: "10px 20px",
               borderRadius: "8px",
               fontSize: "16px",
               color: "white",
-              display: "inline-block",
               backgroundColor: "#17a2b8",
-              textAlign: "center",
             }}
-            onClick={handleNewGame}
             disabled={loading}
           >
             {loading ? "Creating..." : "New Game"}
-          </Link>
+          </button>
         </Col>
       </Row>
     </>
@@ -83,6 +80,23 @@ function LoggedInHome(props) {
 }
 
 function NotLoggedInHome() {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
+  const handleNewDemoGame = async () => {
+    setLoading(true);
+    try {
+      const { initialCards, newCard  } = await API.createDemoGame();
+
+      navigate(`/games/demo`, {
+        state: { initialCards, newCard },
+      });
+    } catch (err) {
+      alert("Error during creation of the demo game" + err);
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <>
       <Row className="mt-3">
@@ -95,22 +109,20 @@ function NotLoggedInHome() {
       </Row>
       <Row className="mt-3">
         <Col>
-          <Link
-            to="/games/demo"
+          <button
+            onClick={handleNewDemoGame}
             className="btn btn-info"
             style={{
-              textDecoration: "none",
               padding: "10px 20px",
               borderRadius: "8px",
               fontSize: "16px",
               color: "white",
-              display: "inline-block",
               backgroundColor: "#17a2b8",
-              textAlign: "center",
             }}
+            disabled={loading}
           >
-            New Demo Game
-          </Link>
+            {loading ? "Creating..." : "New Demo Game"}
+          </button>
         </Col>
       </Row>
     </>

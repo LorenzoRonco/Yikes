@@ -2,6 +2,20 @@ import { Card, Game, GameCards } from "../models/GCModels.mjs";
 
 const SERVER_URL = "http://localhost:3001";
 
+//GET /api/cards/:cardId
+const getCard = async (cardId) => {
+  const response = await fetch(SERVER_URL + `/api/cards/${cardId}`);
+  if (response.ok) {
+    const cardJson = await response.json();
+    return new Card(
+      cardJson.id,
+      cardJson.title,
+      cardJson.imageUrl,
+      cardJson.misfortune
+    );
+  } else throw new Error("Internal server error");
+};
+
 
 //Get all games
 //GET /api/games
@@ -41,6 +55,50 @@ const getRoundsOfGame = async (gameId) => {
       (gc) =>
         new GameCards(gc.gameId, gc.cardId, gc.roundId, gc.guessedCorrectly)
     );
+  } else throw new Error("Internal server error");
+};
+
+//post /api/games/demo (per la partita demo dell’utente anonimo)
+const createDemoGame = async () => {
+  const response = await fetch(SERVER_URL + "/api/games/demo", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+  });
+  if (response.ok) {
+    const responseJson = await response.json();
+    return {
+      initialCards: responseJson.initialCards.map((g) =>
+        new Card(g.id, g.title, g.imageUrl, g.misfortune)
+      ),
+      newCard: new Card(
+        responseJson.newCard.id,
+        responseJson.newCard.title,
+        responseJson.newCard.imageUrl
+      )
+    };
+  } else throw new Error("Internal server error");
+};
+
+//POST /api/games/demo/evaluate-guess (for demo game of not logged user)
+const evaluateDemoGame = async (initialHand, guessCard, index) => {
+  const response = await fetch(SERVER_URL + "/api/games/demo/evaluate-guess", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      initialHand,
+      guessCard,
+      index,
+    }),
+    credentials: "include",
+  });
+  if (response.ok) {
+    const responseJson = await response.json();
+    return responseJson.won;
   } else throw new Error("Internal server error");
 };
 
@@ -194,6 +252,7 @@ const logOut = async () => {
 };
 
 const API = {
+  getCard,
   getGames,
   getGame,
   getRoundsOfGame,
@@ -204,6 +263,8 @@ const API = {
   logIn,
   getUserInfo,
   logOut,
+  createDemoGame,
+  evaluateDemoGame,
   SERVER_URL, // Export the server URL if needed elsewhere
 };
 export default API;

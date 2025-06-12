@@ -34,7 +34,7 @@ export const getCard = (id) => {
       } else if (row === undefined) {
         resolve({ error: "Card not available, check the inserted id." });
       } else {
-        resolve(new Card(c.id, c.title, c.imageUrl, c.misfortune));
+        resolve(new Card(row.id, row.title, row.imageUrl, row.misfortune));
       }
     });
   });
@@ -50,6 +50,19 @@ export const getRandomCardsForGame = (gameId, limit) => {
       )
       ORDER BY RANDOM() LIMIT ?`;
     db.all(sql, [gameId, limit], (err, rows) => {
+      if (err) reject(err);
+      else resolve(rows);
+    });
+  });
+};
+
+//select random cards NOT bounded to gameId (used for demo game)
+export const getRandomCards = (limit) => {
+  return new Promise((resolve, reject) => {
+    const sql = `
+      SELECT * FROM cards
+      ORDER BY RANDOM() LIMIT ?`;
+    db.all(sql, [limit], (err, rows) => {
       if (err) reject(err);
       else resolve(rows);
     });

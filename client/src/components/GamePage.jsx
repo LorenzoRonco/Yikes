@@ -33,35 +33,35 @@ function GamePage(props) {
   const [loadingNewGame, setLoadingNewGame] = useState(false);
 
   useEffect(() => {
-  if (location.state?.game && location.state?.initialCards) {
-    setGame(location.state.game);
-    setInitialCards(location.state.initialCards);
-    setGameStatus(location.state.game.status);
-    setStarted(false);
-    setNewCard(null);
-    setRoundCount(1);
-    setShowFeedback(false);
-    setLastGuessCorrect(null);
-    setLastGuessCard(null);
-    setLastHand(null);
-    setTimeLeft(30);
-    setTimerActive(false);
-    setWasTimeout(false);
-    setError(null);
-  }
-}, [gameId]);  // <-- ogni volta che cambia gameId, resetta tutto
+    if (location.state?.game && location.state?.initialCards) {
+      setGame(location.state.game);
+      setInitialCards(location.state.initialCards);
+      setGameStatus(location.state.game.status);
+      setStarted(false);
+      setNewCard(null);
+      setRoundCount(1);
+      setShowFeedback(false);
+      setLastGuessCorrect(null);
+      setLastGuessCard(null);
+      setLastHand(null);
+      setTimeLeft(30);
+      setTimerActive(false);
+      setWasTimeout(false);
+      setError(null);
+    }
+  }, [gameId]);  // <-- ogni volta che cambia gameId, resetta tutto
 
 
   useEffect(() => {
-  if (location.state?.game && !game) {
-    setGame(location.state.game);
-    setGameStatus(location.state.game.status);
-  }
+    if (location.state?.game && !game) {
+      setGame(location.state.game);
+      setGameStatus(location.state.game.status);
+    }
 
-  if (location.state?.initialCards?.length > 0 && initialCards.length === 0) {
-    setInitialCards(location.state.initialCards);
-  }
-}, [location.state]);
+    if (location.state?.initialCards?.length > 0 && initialCards.length === 0) {
+      setInitialCards(location.state.initialCards);
+    }
+  }, [location.state]);
 
 
   useEffect(() => {
@@ -215,30 +215,30 @@ function GamePage(props) {
     );
   }
 
- if (gameStatus === "won" || gameStatus === "lost") {
-  return (
-    <FinalScreen
-      gameStatus={gameStatus}
-      lastHand={lastHand}
-      handleNewGame={handleNewGame}
-      loading={loadingNewGame}
-    />
-  );
-}
+  if (gameStatus === "won" || gameStatus === "lost") {
+    return (
+      <FinalScreen
+        gameStatus={gameStatus}
+        lastHand={lastHand}
+        handleNewGame={handleNewGame}
+        loading={loadingNewGame}
+      />
+    );
+  }
 
-if (showFeedback) {
-  return (
-    <FeedbackSection
-      lastGuessCorrect={lastGuessCorrect}
-      wasTimeout={wasTimeout}
-      lastGuessCard={lastGuessCard}
-      handleNextRound={handleNextRound}
-      loading={loading}
-      roundCount={roundCount}
-      gameStatus={gameStatus}
-    />
-  );
-}
+  if (showFeedback) {
+    return (
+      <FeedbackSection
+        lastGuessCorrect={lastGuessCorrect}
+        wasTimeout={wasTimeout}
+        lastGuessCard={lastGuessCard}
+        handleNextRound={handleNextRound}
+        loading={loading}
+        roundCount={roundCount}
+        gameStatus={gameStatus}
+      />
+    );
+  }
 
 
   return (

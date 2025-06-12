@@ -6,6 +6,7 @@ import {
   getCards,
   getCard,
   getRandomCardsForGame,
+  getRandomCards,
   listGamesByUserId,
   getGame,
   addGame,
@@ -65,6 +66,13 @@ const isLoggedIn = (req, res, next) => {
   return res.status(401).json({ error: "Not authorized" });
 };
 
+const isNotLoggedIn = (req, res, next) => { //for demo game
+  if (!req.isAuthenticated()) {
+    return next();
+  }
+  return res.status(403).json({ error: "Already logged in" });
+};
+
 app.use(
   session({
     secret: "shhhhh... it's a secret!",
@@ -75,6 +83,20 @@ app.use(
 app.use(passport.authenticate("session"));
 
 /** ROUTES **/
+
+//GET /api/cards/:cardId
+app.get("/api/cards/:cardId", async (req, res) => {
+  try {
+    const game = await getCard(req.params.cardId);
+    if (game.error) {
+      res.status(404).json(game);
+    } else {
+      res.json(game);
+    }
+  } catch {
+    res.status(500).end();
+  }
+});
 
 // GET /api/games
 app.get("/api/games", (req, res) => {
@@ -110,6 +132,56 @@ app.get("/api/games/:gameId/rounds", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+//POST /api/games/demo
+app.post(
+  "/api/games/demo",
+  isNotLoggedIn,
+  async (req, res) => {
+    try {
+      // extract 4 random cards
+      const cards = await getRandomCards(4);
+      const initialCards = cards.slice(0,3);
+      const newCard = cards[3];
+
+      // returns initial cards + guess card
+      res.status(201).json({
+        initialCards,
+        newCard
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  }
+);
+
+//POST /api/games/demo/evaluate-guess
+app.post(
+  "/api/games/demo/evaluate-guess",
+  isNotLoggedIn,
+  [
+    check("initialHand").isArray({ min: 3, max: 3 }), //ensure there are 3 cards in the hand
+    check("guessCard").notEmpty(),
+    check("index").optional({ nullable: true }).isInt({ min: 0 }), //optional so it recognize when user loses due to time
+  ],
+  (req, res) => { //no async because there are no await inside
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+
+    const guessCard = req.body.guessCard;
+    const index = req.body.index;
+
+    const sortedHand = [...req.body.initialHand].sort((a, b) => a.misfortune - b.misfortune); //sort initial hand
+    const handWithCard = [...sortedHand.slice(0, index), guessCard, ...sortedHand.slice(index)];
+    const isCorrect = handWithCard.every((card, i, arr) => i === 0 || arr[i - 1].misfortune <= card.misfortune);
+
+    return res.json({ won: isCorrect });
+  }
+);
+
 
 //POST /api/games
 app.post(
