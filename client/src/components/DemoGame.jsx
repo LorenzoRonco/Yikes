@@ -121,6 +121,7 @@ function DemoGame({ user }) {
     if (!started) {
         return (
             <Container className="text-center mt-5">
+                <GameInstructions/>
                 {error && <div className="text-danger mb-3">{error}</div>}
                 <Button onClick={handleStartGame} variant="primary" size="lg" disabled={loading}>
                     {loading ? <Spinner animation="border" size="sm" /> : "Inizia il gioco demo"}
@@ -261,5 +262,29 @@ function FeedbackSection({ lastGuessCorrect, wasTimeout, lastGuessCard, lastHand
         </Container>
     );
 }
+
+function GameInstructions() {
+  return (
+    <Card className="mb-4">
+      <Card.Body>
+        <Card.Title>🃏 How the Game Works</Card.Title>
+        <Card.Text>
+          You start with <strong>3 random misfortune cards</strong>.<br />
+          In each round, you'll get a <strong>new situation</strong> (image and title only).<br />
+          Your task is to <strong>guess where it fits</strong> among your current cards based on its hidden badness value (1–100).
+        </Card.Text>
+        <Card.Text>
+          <span className="text-success">✅ Correct guess</span>: you get the new card.<br />
+          <span className="text-danger">❌ Wrong or timeout</span>: you lose the round.
+        </Card.Text>
+        <Card.Text>
+          <strong>Win</strong> by collecting 6 cards.<br />
+          <strong>Lose</strong> after 3 wrong guesses.
+        </Card.Text>
+      </Card.Body>
+    </Card>
+  );
+}
+
 
 export default DemoGame;
