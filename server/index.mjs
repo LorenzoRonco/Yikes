@@ -99,10 +99,40 @@ app.get("/api/cards/:cardId", async (req, res) => {
 });
 
 // GET /api/games
-app.get("/api/games", (req, res) => {
-  listGamesByUserId(req.user.id)
-    .then((games) => res.json(games))
-    .catch(() => res.status(500).end());
+app.get("/api/games", async (req, res) => {
+  try {
+    const games = await listGamesByUserId(req.user.id);
+
+    const enrichedGames = await Promise.all(
+      games.map(async (game) => {
+        const rounds = await getGameCards(game.id);
+
+        const roundDetails = await Promise.all(
+          rounds.map(async (r) => {
+            const card = await getCard(r.cardId);
+            return {
+              roundId: r.roundId,
+              guessedCorrectly: r.guessedCorrectly,
+              card: card,
+            };
+          })
+        );
+
+        return {
+          id: game.id,
+          startedAt: game.startedAt,
+          correctGuesses: game.correctGuesses,
+          status: game.status,
+          rounds: roundDetails,
+        };
+      })
+    );
+
+    res.json(enrichedGames);
+  } catch (error) {
+    console.error("Error generating game history:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 // GET /api/games/:gameId

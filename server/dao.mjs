@@ -73,7 +73,7 @@ export const getRandomCards = (limit) => {
 //get all the games of the user by its user id
 export const listGamesByUserId = (userId) => {
   return new Promise((resolve, reject) => {
-    const sql = "SELECT * FROM games WHERE user.Id = ?";
+    const sql = "SELECT * FROM games WHERE userId = ? AND status IN ('won', 'lost')"; //discard ongoing games
     db.get(sql, [userId], (err, rows) => {
       if (err) reject(err);
       else {

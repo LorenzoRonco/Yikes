@@ -17,16 +17,12 @@ const getCard = async (cardId) => {
 };
 
 
-//Get all games
+//Get all games of logged user
 //GET /api/games
-const getGames = async () => {
-  const response = await fetch(SERVER_URL + "/api/games");
-  if (response.ok) {
-    const gamesJson = await response.json();
-    return gamesJson.map(
-      (g) => new Game(g.id, g.userId, g.startedAt, g.correctGuesses, g.status)
-    );
-  } else throw new Error("Internal server error");
+export const getGameHistory = async () => {
+  const response = await fetch(`${SERVER_URL}/api/games`);
+  if (!response.ok) throw new Error("Failed to fetch game history");
+  return await response.json();
 };
 
 //Get single game
@@ -57,6 +53,8 @@ const getRoundsOfGame = async (gameId) => {
     );
   } else throw new Error("Internal server error");
 };
+
+
 
 //post /api/games/demo (per la partita demo dell’utente anonimo)
 const createDemoGame = async () => {

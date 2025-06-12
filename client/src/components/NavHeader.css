@@ -1,0 +1,3 @@
+#user-dropdown::after { 
+  display: none !important; /* hides the arrow of the dropdown */
+}

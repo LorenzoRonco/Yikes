@@ -8,6 +8,7 @@ import DemoGame from "./components/DemoGame";
 import NotFound from "./components/NotFound";
 import API from "./API/API.mjs";
 import GamePage from "./components/GamePage";
+import ProfilePage from "./components/ProfilePage"; 
 
 
 function App() {
@@ -50,10 +51,11 @@ function App() {
 
   return (
     <Routes>
-      <Route element={<DefaultLayout loggedIn={loggedIn} handleLogout={handleLogout} message={message} setMessage={setMessage} />}>
+      <Route element={<DefaultLayout loggedIn={loggedIn} handleLogout={handleLogout} user={user} message={message} setMessage={setMessage} />}>
         <Route path="/" element={<Home user={user} />} />
         <Route path="/games/:gameId" element={<GamePage user={user}/>}></Route>
         <Route path="/games/demo" element={<DemoGame user={user}/>}></Route>
+        <Route path="/profile" element={loggedIn ? <ProfilePage user={user}/> : <Navigate replace to="/" />}></Route> {/* if user not logged id, redirect him to the home*/}
       </Route>
       <Route path="/login" element={loggedIn ? (<Navigate replace to="/" />) : (<LoginForm handleLogin={handleLogin} />)} />
       <Route path="*" element={<NotFound />} />

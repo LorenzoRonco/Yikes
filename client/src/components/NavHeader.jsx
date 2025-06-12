@@ -1,20 +1,16 @@
 import { useEffect, useState } from 'react';
-import { Button, Container, Navbar } from 'react-bootstrap';
+import { Button, Container, Navbar, Dropdown } from 'react-bootstrap';
 import { Link, useMatch } from "react-router";
-import { LogoutButton } from './AuthComponents';
 import 'bootstrap-icons/font/bootstrap-icons.css';
+import './NavHeader.css'
 
 function NavHeader(props) {
   const [darkMode, setDarkMode] = useState(false);
-
-  //it will disable the link on Yikes! to homepage during game
   const match = useMatch("/games/:gameId");
 
   useEffect(() => {
-    // se darkMode === true, aggiungiamo data-bs-theme al tag htmlF
     if (darkMode)
       document.documentElement.setAttribute("data-bs-theme", "dark");
-    // altrimenti, rimuoviamo data-bs-theme
     else
       document.documentElement.removeAttribute("data-bs-theme");
   }, [darkMode]);
@@ -22,21 +18,43 @@ function NavHeader(props) {
   return (
     <Navbar bg='primary' data-bs-theme='dark'>
       <Container fluid>
-        {match ? (//if in game page the link is disabled
+        {match ? (
           <Link to="/" className="navbar-brand" onClick={(e) => e.preventDefault()}>Yikes!</Link>
         ) : (
           <Link to="/" className="navbar-brand">Yikes!</Link>
-        )
-        }
-
-        <Button onClick={() => setDarkMode(oldMode => !oldMode)}>
-          {darkMode ? <i className="bi bi-sun-fill" /> : <i className="bi bi-moon-fill" />}
-        </Button>
-        {!match && (
-          props.loggedIn ?
-            <LogoutButton logout={props.handleLogout} /> :
-            <Link to='/login' className='btn btn-outline-light'>Login</Link>
         )}
+
+        <div className="d-flex align-items-center gap-2">
+          <Button onClick={() => setDarkMode(oldMode => !oldMode)}>
+            {darkMode ? <i className="bi bi-sun-fill" /> : <i className="bi bi-moon-fill" />}
+          </Button>
+
+          {!match && props.loggedIn ? (
+            <Dropdown align="end">
+              <Dropdown.Toggle
+                as="div"
+                id="user-dropdown"
+                className="d-flex align-items-center text-light gap-2 px-2 py-1"
+                style={{
+                  cursor: 'pointer',
+                  border: '1px solid white',
+                  borderRadius: '8px'
+                }}
+              >
+                <i className="bi bi-person-circle fs-4" />
+                <span>{props.user?.name || "Utente"}</span>
+              </Dropdown.Toggle>
+
+
+              <Dropdown.Menu>
+                <Dropdown.Item as={Link} to="/profile">Profilo</Dropdown.Item>
+                <Dropdown.Item onClick={props.handleLogout}>Logout</Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
+          ) : !match && (
+            <Link to='/login' className='btn btn-outline-light'>Login</Link>
+          )}
+        </div>
       </Container>
     </Navbar>
   );
