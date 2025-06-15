@@ -36,8 +36,9 @@ function App() {
       const user = await API.logIn(credentials);
       setLoggedIn(true);
       setUser(user);
+      setMessage(null);  // reset error messages when login succesfull
     } catch (err) {
-      setMessage({ msg: err, type: "danger" });
+      setMessage({ msg: "Login failed. Check your credentials.", type: "danger" });
     }
   };
 
@@ -52,11 +53,11 @@ function App() {
     <Routes>
       <Route element={<DefaultLayout loggedIn={loggedIn} handleLogout={handleLogout} user={user} message={message} setMessage={setMessage} />}>
         <Route path="/" element={<Home user={user} />} />
-        <Route path="/games/:gameId" element={<GamePage user={user}/>}></Route>
-        <Route path="/games/demo" element={<DemoGame user={user}/>}></Route>
-        <Route path="/profile" element={loggedIn ? <ProfilePage user={user}/> : <Navigate replace to="/" />}></Route> {/* if user not logged id, redirect him to the home*/}
+        <Route path="/games/:gameId" element={<GamePage user={user} />}></Route>
+        <Route path="/games/demo" element={<DemoGame user={user} />}></Route>
+        <Route path="/profile" element={loggedIn ? <ProfilePage user={user} /> : <Navigate replace to="/" />}></Route> {/* if user not logged id, redirect him to the home*/}
       </Route>
-      <Route path="/login" element={loggedIn ? (<Navigate replace to="/" />) : (<LoginForm handleLogin={handleLogin} />)} />
+      <Route path="/login" element={loggedIn ? (<Navigate replace to="/" />) : (<LoginForm handleLogin={handleLogin} message={message} setMessage={setMessage} />)} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
