@@ -49,7 +49,7 @@ function GamePage(props) {
       setWasTimeout(false);
       setError(null);
     }
-  }, [gameId]);  // <-- ogni volta che cambia gameId, resetta tutto
+  }, [gameId]);  // reset everything when gameId changes (to handle "New Game" from end game page)
 
 
   useEffect(() => {
@@ -89,10 +89,10 @@ function GamePage(props) {
 
   const handleTimeout = async () => {
     setError(null);
-    setWasTimeout(true); // <-- QUI
+    setWasTimeout(true);
 
     try {
-      const result = await API.updateRound(gameId, roundCount, null); // indice nullo
+      const result = await API.updateRound(gameId, roundCount, null); //null index 'cause user didn't guessed
       setLastGuessCorrect(result.correct);
       setLastGuessCard(result.guessCard);
       setLastHand(result.hand);
@@ -103,7 +103,7 @@ function GamePage(props) {
 
       setShowFeedback(true);
     } catch (err) {
-      setError("Errore durante la valutazione automatica.");
+      setError("Error during round evaluation");
     }
   };
 
@@ -124,7 +124,7 @@ function GamePage(props) {
       setStarted(true);
       startTimer();
     } catch (err) {
-      setError("Errore durante la creazione del primo round.");
+      setError("Error during creation of first round");
     }
     setLoading(false);
   };
@@ -141,10 +141,9 @@ function GamePage(props) {
       setLastGuessCard(result.guessCard);
       setLastHand(result.hand);
 
-      // lascia decidere a handleNextRound cosa fare dopo
       setShowFeedback(true);
     } catch (err) {
-      setError("Errore durante la valutazione.");
+      setError("Error during evaluation");
     }
   };
 
@@ -161,15 +160,15 @@ function GamePage(props) {
       if (updatedGame.status === "ongoing") {
         const card = await API.createRound(gameId, { roundId: nextRound });
         setNewCard(card);
-        setInitialCards(lastHand); // aggiorna la mano con quella aggiornata
+        setInitialCards(lastHand); // update hand
         setRoundCount(nextRound);
         setWasTimeout(false);
-        setShowFeedback(false); // chiude il feedback
+        setShowFeedback(false); // close feedback
         startTimer();
       }
-      // ❗ se lo status è "won" o "lost", NON fare nulla: la schermata verrà mostrata automaticamente
+      // if the game is "won" or "lost" the end game page will be shown automatically
     } catch (err) {
-      setError("Errore durante l'avanzamento al prossimo round.");
+      setError("Error during advancement to next round");
     }
 
     setLoading(false);
@@ -195,7 +194,7 @@ function GamePage(props) {
         state: { game, initialCards },
       });
     } catch (err) {
-      setError("Errore durante la creazione della nuova partita.");
+      setError("Error during the creation of the new game");
     } finally {
       setLoadingNewGame(false);
     }
@@ -207,10 +206,22 @@ function GamePage(props) {
   if (!started) {
     return (
       <Container className="text-center mt-5">
-        <GameInstructions/>
+        <GameInstructions />
         {error && <div className="text-danger mb-3">{error}</div>}
-        <Button onClick={handleStartGame} variant="primary" size="lg" disabled={loading}>
-          {loading ? <Spinner animation="border" size="sm" /> : "Inizia il gioco"}
+        <Button onClick={handleStartGame} variant="primary" size="lg" disabled={loading}
+          className="d-block mx-auto"
+          style={{
+            padding: "12px 28px",
+            fontSize: "1.25rem",
+            borderRadius: "10px",
+            backgroundColor: "#57b8d4",
+            borderColor: "#57b8d4",
+            boxShadow: '0 4px 8px rgb(23 162 184 / 0.4)',
+            transition: 'background-color 0.3s ease',
+            fontWeight: '700',
+          }}
+        >
+          {loading ? <Spinner animation="border" size="sm" /> : "Start game"}
         </Button>
       </Container>
     );
@@ -252,7 +263,7 @@ function GamePage(props) {
         </>
       )}
       <div className="mb-3">
-        <h5 className="text-danger mb-1">Tempo rimasto:</h5>
+        <h5 className="text-danger mb-1">Time left:</h5>
         <ProgressBar
           animated
           variant={timeLeft > 10 ? "primary" : "danger"}
@@ -269,10 +280,10 @@ function GamePage(props) {
 function PlayerHand({ initialCards, handleInsertCard }) {
   return (
     <>
-      <h4>Mano del giocatore</h4>
+      <h4>Player's hand</h4>
       <Row className="flex-nowrap overflow-auto">
         <Col xs="auto">
-          <Button variant="outline-primary" onClick={() => handleInsertCard(0)}>Inserisci qui</Button>
+          <Button variant="outline-primary" onClick={() => handleInsertCard(0)}>Insert here</Button>
         </Col>
 
         {initialCards
@@ -289,14 +300,14 @@ function PlayerHand({ initialCards, handleInsertCard }) {
                   />
                   <Card.Body>
                     <Card.Title style={{ fontSize: "0.9rem" }}>
-                      {card.title} <br /> misfortune: {card.misfortune}
+                      {card.title} <br /> Misfortune: {card.misfortune}
                     </Card.Title>
                   </Card.Body>
                 </Card>
               </Col>
               <Col xs="auto">
                 <Button variant="outline-primary" onClick={() => handleInsertCard(idx + 1)}>
-                  Inserisci qui
+                  Insert here
                 </Button>
               </Col>
             </Fragment>
@@ -310,7 +321,7 @@ function NewCardSection({ newCard }) {
   if (!newCard) return null;
   return (
     <>
-      <h4>Nuova Carta</h4>
+      <h4>New Card</h4>
       <Row className="mb-4">
         <Col xs={12} md={4}>
           <Card>
@@ -330,10 +341,10 @@ function FeedbackSection({ lastGuessCorrect, wasTimeout, lastGuessCard, handleNe
     <Container className="text-center mt-5">
       <h3>
         {lastGuessCorrect
-          ? "Hai indovinato!"
+          ? "You guessed correctly! ✅"
           : wasTimeout
-            ? "Tempo scaduto!"
-            : "Ordine errato!"}
+            ? "Time's over! ⏰"
+            : "Wrong answer! ❌"}
       </h3>
 
       <Card style={{ width: "18rem", margin: "20px auto" }}>
@@ -343,7 +354,16 @@ function FeedbackSection({ lastGuessCorrect, wasTimeout, lastGuessCard, handleNe
           <Card.Text>Misfortune: {lastGuessCard.misfortune}</Card.Text>
         </Card.Body>
       </Card>
-      <Button onClick={handleNextRound} variant="primary" size="lg" disabled={loading}>
+      <Button onClick={handleNextRound} variant="primary" size="lg" disabled={loading}
+      style={{
+          padding: "12px 28px",
+          fontSize: "1.25rem",
+          borderRadius: "10px",
+          backgroundColor: "#57b8d4",
+          borderColor: "#57b8d4",
+          boxShadow: '0 4px 8px rgb(23 162 184 / 0.4)',
+          fontWeight: '700',
+        }}>
         {loading ? (
           <Spinner animation="border" size="sm" />
         ) : (
@@ -358,7 +378,7 @@ function FinalScreen({ gameStatus, lastHand, handleNewGame, loading }) {
   return (
     <Container className="text-center mt-5">
       <h2 className={gameStatus === "won" ? "text-success" : "text-danger"}>
-        {gameStatus === "won" ? "Hai vinto!" : "Hai perso!"}
+        {gameStatus === "won" ? "You won!" : "You lost!"}
       </h2>
       <h5 className="my-4">Le tue carte:</h5>
       <Row className="justify-content-center">
@@ -377,9 +397,27 @@ function FinalScreen({ gameStatus, lastHand, handleNewGame, loading }) {
           ))}
       </Row>
       <div className="mt-4">
-        <Button variant="primary" className="me-3" onClick={() => window.location.href = "/"}>Torna alla Home</Button>
-        <Button variant="success" onClick={handleNewGame} disabled={loading}>
-          {loading ? <Spinner animation="border" size="sm" /> : "Nuova Partita"}
+        <Button variant="primary" className="me-3" onClick={() => window.location.href = "/"}
+          style={{
+            padding: "12px 28px",
+            fontSize: "1.25rem",
+            borderRadius: "10px",
+            backgroundColor: "#57b8d4",
+            borderColor: "#57b8d4",
+            boxShadow: '0 4px 8px rgb(23 162 184 / 0.4)',
+            fontWeight: '700',
+          }}>Home</Button>
+        <Button variant="success" onClick={handleNewGame}
+          style={{
+            padding: "12px 28px",
+            fontSize: "1.25rem",
+            borderRadius: "10px",
+            backgroundColor: "#57b8d4",
+            borderColor: "#57b8d4",
+            boxShadow: '0 4px 8px rgb(23 162 184 / 0.4)',
+            fontWeight: '700',
+          }} disabled={loading}>
+          {loading ? <Spinner animation="border" size="sm" /> : "New Game"}
         </Button>
       </div>
     </Container>
@@ -395,7 +433,7 @@ function GameInstructions() {
         <Card.Text>
           You start with <strong>3 random misfortune cards</strong>.<br />
           In each round, you'll get a <strong>new situation</strong> (image and title only).<br />
-          Your task is to <strong>guess where it fits</strong> among your current cards based on its hidden badness value (1–100).
+          Your task is to <strong>guess where it fits</strong> among your current cards based on its hidden misfortune value (1–100).
         </Card.Text>
         <Card.Text>
           <span className="text-success">✅ Correct guess</span>: you get the new card.<br />

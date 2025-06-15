@@ -9,24 +9,35 @@ function NavHeader(props) {
   const match = useMatch("/games/:gameId");
 
   useEffect(() => {
-    if (darkMode)
+    if (darkMode) {
       document.documentElement.setAttribute("data-bs-theme", "dark");
-    else
+      document.body.style.backgroundColor = '#1A1A1D';  // dark mode
+    } else {
       document.documentElement.removeAttribute("data-bs-theme");
+      document.body.style.backgroundColor = '#FFF6EB';  // light mode
+    }
   }, [darkMode]);
 
+
   return (
-    <Navbar bg='primary' data-bs-theme='dark'>
+    <Navbar style={{ backgroundColor: darkMode ? '#370617' : '#FFDD99', height: '60px' }}>
       <Container fluid>
-        {match ? (
-          <Link to="/" className="navbar-brand" onClick={(e) => e.preventDefault()}>Yikes!</Link>
+        {match ? ( //avoid it to be clickable during games
+          <Link to="/" className="navbar-brand" style={{ color: darkMode ? '#fee440' : '#E45341' }} onClick={(e) => e.preventDefault()}>Yikes!</Link>
         ) : (
-          <Link to="/" className="navbar-brand">Yikes!</Link>
+          <Link to="/" className="navbar-brand" style={{ color: darkMode ? '#fee440' : '#E45341' }}>Yikes!</Link>
         )}
 
         <div className="d-flex align-items-center gap-2">
-          <Button onClick={() => setDarkMode(oldMode => !oldMode)}>
-            {darkMode ? <i className="bi bi-sun-fill" /> : <i className="bi bi-moon-fill" />}
+          <Button onClick={() => setDarkMode(oldMode => !oldMode)}
+            style={{
+              backgroundColor: darkMode ? '#370617' : '#FFDD99',
+              borderColor: darkMode ? '#370617' : '#FFDD99',
+              boxShadow: 'none'
+            }}
+            variant="outline-none"
+          >
+            {darkMode ? <i className="bi bi-sun-fill" style={{ color: '#FFF6EB' }} /> : <i className="bi bi-moon-fill" style={{ color: '#1a1a1d' }} />}
           </Button>
 
           {!match && props.loggedIn ? (
@@ -37,12 +48,17 @@ function NavHeader(props) {
                 className="d-flex align-items-center text-light gap-2 px-2 py-1"
                 style={{
                   cursor: 'pointer',
-                  border: '1px solid white',
-                  borderRadius: '8px'
+                  border: '1px',
+                  backgroundColor: darkMode ? '#B2B2B2' : '#feb871',
+                  borderColor: darkMode ? '#B2B2B2' : '#feb871',
+                  borderRadius: '8px',
+                  fontSize: '1.1rem', 
+                  fontWeight: '450',
+                  color: '#1a1a1d'
                 }}
               >
-                <i className="bi bi-person-circle fs-4" />
-                <span>{props.user?.name || "Utente"}</span>
+                <i className="bi bi-person-circle fs-4" style={{color : '#1a1a1d'}}/>
+                <span style={{color : '#1a1a1d'}}>{props.user?.name || "Utente"}</span>
               </Dropdown.Toggle>
 
 
@@ -52,7 +68,9 @@ function NavHeader(props) {
               </Dropdown.Menu>
             </Dropdown>
           ) : !match && (
-            <Link to='/login' className='btn btn-outline-light'>Login</Link>
+            <Link to='/login' className='btn btn-outline-light'
+              style={{ backgroundColor: darkMode ? '#B2B2B2' : '#feb871', borderColor: darkMode ? '#B2B2B2' : '#feb871', color: '#1a1a1d', fontSize: '1.1rem', fontWeight: '450' }}
+            >Login</Link>
           )}
         </div>
       </Container>

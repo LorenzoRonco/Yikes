@@ -8,7 +8,8 @@ import DemoGame from "./components/DemoGame";
 import NotFound from "./components/NotFound";
 import API from "./API/API.mjs";
 import GamePage from "./components/GamePage";
-import ProfilePage from "./components/ProfilePage"; 
+import ProfilePage from "./components/ProfilePage";
+import "./App.css"
 
 
 function App() {
@@ -25,7 +26,6 @@ function App() {
       } catch {
         setLoggedIn(false);
         setUser(null);
-        setMessage({ msg: "You are not logged in", type: "danger" });
       }
     };
     checkAuth();
@@ -35,7 +35,6 @@ function App() {
     try {
       const user = await API.logIn(credentials);
       setLoggedIn(true);
-      setMessage({ msg: `Welcome, ${user.name}!`, type: "success" });
       setUser(user);
     } catch (err) {
       setMessage({ msg: err, type: "danger" });
