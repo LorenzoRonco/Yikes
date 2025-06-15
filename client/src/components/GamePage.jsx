@@ -255,22 +255,27 @@ function GamePage(props) {
 
   return (
     <Container>
-      <h2 className="my-4">Game #{game.id}</h2>
+      <h2 className="my-4 " style={{ fontWeight: '700', color: '#E45341' }}>Round {roundCount}</h2>
 
       {newCard && (
         <>
           <NewCardSection newCard={newCard} />
         </>
       )}
-      <div className="mb-3">
-        <h5 className="text-danger mb-1">Time left:</h5>
+      <div className="mb-4">
+        <h5 className="text-danger mb-2 fw-semibold">
+          <i className="bi bi-clock-fill me-2"></i>Time left:
+        </h5>
         <ProgressBar
           animated
+          striped
           variant={timeLeft > 10 ? "primary" : "danger"}
           now={(timeLeft / 30) * 100}
+          style={{ height: '1.5rem', borderRadius: '1rem', fontWeight: '600', fontSize: '0.9rem' }}
           label={`${timeLeft}s`}
         />
       </div>
+
       <PlayerHand initialCards={initialCards} handleInsertCard={handleInsertCard} />
     </Container>
   );
@@ -280,10 +285,24 @@ function GamePage(props) {
 function PlayerHand({ initialCards, handleInsertCard }) {
   return (
     <>
-      <h4>Player's hand</h4>
+      <h4 style={{ fontWeight: '500', color: '#E45341' }}>Player's hand</h4>
       <Row className="flex-nowrap overflow-auto">
-        <Col xs="auto">
-          <Button variant="outline-primary" onClick={() => handleInsertCard(0)}>Insert here</Button>
+        <Col xs="auto" className="d-flex align-items-center">
+          <Button
+            style={{
+              padding: "6px 16px",
+              fontSize: "0.9rem",
+              borderRadius: "8px",
+              backgroundColor: "#57b8d4",
+              borderColor: "#57b8d4",
+              boxShadow: "0 3px 6px rgb(228 83 65 / 0.3)",
+              fontWeight: "700",
+              color: "white",
+              whiteSpace: "nowrap",
+              minWidth: "100px",
+            }}
+            variant="primary"
+            onClick={() => handleInsertCard(0)}>Insert here</Button>
         </Col>
 
         {initialCards
@@ -291,22 +310,36 @@ function PlayerHand({ initialCards, handleInsertCard }) {
           .map((card, idx) => (
             <Fragment key={card.id}>
               <Col xs="auto">
-                <Card style={{ width: "12rem" }}>
+                <Card
+                  className="shadow rounded-4 overflow-hidden border-0 mb-3"
+                  style={{ width: '15rem' }}
+                >
                   <Card.Img
                     variant="top"
                     src={API.SERVER_URL + card.imageUrl}
                     alt={card.title}
-                    style={{ height: "150px", objectFit: "cover" }}
+                    style={{ height: '160px', objectFit: 'cover' }}
                   />
-                  <Card.Body>
-                    <Card.Title style={{ fontSize: "0.9rem" }}>
-                      {card.title} <br /> Misfortune: {card.misfortune}
-                    </Card.Title>
+                  <Card.Body className="d-flex flex-column justify-content-between">
+                    <Card.Title className="fw-bold text-dark text-center">{card.title}</Card.Title>
+                    <Card.Subtitle className="fw-bold text-dark text-center">Misfortune: {card.misfortune}</Card.Subtitle>
                   </Card.Body>
                 </Card>
               </Col>
-              <Col xs="auto">
-                <Button variant="outline-primary" onClick={() => handleInsertCard(idx + 1)}>
+              <Col xs="auto" className="d-flex align-items-center">
+                <Button style={{
+                  padding: "6px 16px",
+                  fontSize: "0.9rem",
+                  borderRadius: "8px",
+                  backgroundColor: "#57b8d4",
+                  borderColor: "#57b8d4",
+                  boxShadow: "0 3px 6px rgb(228 83 65 / 0.3)",
+                  fontWeight: "700",
+                  color: "white",
+                  whiteSpace: "nowrap",
+                  minWidth: "100px",
+                }}
+                  variant="primary" onClick={() => handleInsertCard(idx + 1)}>
                   Insert here
                 </Button>
               </Col>
@@ -321,13 +354,22 @@ function NewCardSection({ newCard }) {
   if (!newCard) return null;
   return (
     <>
-      <h4>New Card</h4>
-      <Row className="mb-4">
-        <Col xs={12} md={4}>
-          <Card>
-            <Card.Img variant="top" src={API.SERVER_URL + newCard.imageUrl} alt={newCard.title} />
-            <Card.Body>
-              <Card.Title>{newCard.title}</Card.Title>
+      <Row className="mb-4 justify-content-center">
+        <Col xs={12} md={4} className="d-flex flex-column align-items-center">
+          <h4 className="mb-3 text-center lead text-secondary">New Card</h4>
+          <Card
+            className="shadow rounded-4 overflow-hidden border-0 mb-3"
+            style={{ width: '15rem' }}
+          >
+            <Card.Img
+              variant="top"
+              src={API.SERVER_URL + newCard.imageUrl}
+              alt={newCard.title}
+              style={{ height: '160px', objectFit: 'cover' }}
+            />
+            <Card.Body className="d-flex flex-column justify-content-between">
+              <Card.Title className="fw-bold text-dark text-center">{newCard.title}</Card.Title>
+              <Card.Subtitle className="fw-bold text-dark text-center">Misfortune: {newCard.misfortune}</Card.Subtitle>
             </Card.Body>
           </Card>
         </Col>
@@ -336,10 +378,11 @@ function NewCardSection({ newCard }) {
   );
 }
 
+
 function FeedbackSection({ lastGuessCorrect, wasTimeout, lastGuessCard, handleNextRound, loading, roundCount, gameStatus }) {
   return (
     <Container className="text-center mt-5">
-      <h3>
+      <h3 className={lastGuessCorrect ? "mb-3 text-success" : "mb-3 text-danger"}>
         {lastGuessCorrect
           ? "You guessed correctly! ✅"
           : wasTimeout
@@ -347,15 +390,19 @@ function FeedbackSection({ lastGuessCorrect, wasTimeout, lastGuessCard, handleNe
             : "Wrong answer! ❌"}
       </h3>
 
-      <Card style={{ width: "18rem", margin: "20px auto" }}>
-        <Card.Img variant="top" src={API.SERVER_URL + lastGuessCard.imageUrl} alt={lastGuessCard.title} />
-        <Card.Body>
-          <Card.Title>{lastGuessCard.title}</Card.Title>
+      <Card className=" shadow rounded-4 overflow-hidden border-0 mb-3 mx-auto d-block"
+        style={{ width: '15rem' }}>
+        <Card.Img
+          variant="top"
+          src={API.SERVER_URL + lastGuessCard.imageUrl} alt={lastGuessCard.title}
+          style={{ height: '160px', objectFit: 'cover' }} />
+        <Card.Body className="d-flex flex-column justify-content-between">
+          <Card.Title className="fw-bold text-dark text-center">{lastGuessCard.title}</Card.Title>
           <Card.Text>Misfortune: {lastGuessCard.misfortune}</Card.Text>
         </Card.Body>
       </Card>
       <Button onClick={handleNextRound} variant="primary" size="lg" disabled={loading}
-      style={{
+        style={{
           padding: "12px 28px",
           fontSize: "1.25rem",
           borderRadius: "10px",
@@ -378,18 +425,20 @@ function FinalScreen({ gameStatus, lastHand, handleNewGame, loading }) {
   return (
     <Container className="text-center mt-5">
       <h2 className={gameStatus === "won" ? "text-success" : "text-danger"}>
-        {gameStatus === "won" ? "You won!" : "You lost!"}
+        {gameStatus === "won" ? "You won! 🏆" : "You lost! 😕"}
       </h2>
-      <h5 className="my-4">Le tue carte:</h5>
+      <h5 className="my-4 lead text-secondary">Your cards:</h5>
       <Row className="justify-content-center">
         {lastHand
           .sort((c1, c2) => c1.misfortune - c2.misfortune)
           .map((card) => (
             <Col xs="auto" key={card.id} className="mb-3">
-              <Card style={{ width: "12rem" }}>
-                <Card.Img variant="top" src={API.SERVER_URL + card.imageUrl} />
-                <Card.Body>
-                  <Card.Title style={{ fontSize: "0.9rem" }}>{card.title}</Card.Title>
+              <Card className=" shadow rounded-4 overflow-hidden border-0 mb-3 mx-auto d-block"
+                style={{ width: '12rem' }}>
+                <Card.Img variant="top" src={API.SERVER_URL + card.imageUrl} alt={card.title}
+                  style={{ height: '160px', objectFit: 'cover' }} />
+                <Card.Body className="d-flex flex-column justify-content-between">
+                  <Card.Title className="fw-bold text-dark text-center">{card.title}</Card.Title>
                   <Card.Text>Misfortune: {card.misfortune}</Card.Text>
                 </Card.Body>
               </Card>
@@ -399,17 +448,17 @@ function FinalScreen({ gameStatus, lastHand, handleNewGame, loading }) {
       <div className="mt-4">
         <Button variant="primary" className="me-3" onClick={() => window.location.href = "/"}
           style={{
-            padding: "12px 28px",
+            padding: "10px 26px",
             fontSize: "1.25rem",
             borderRadius: "10px",
-            backgroundColor: "#57b8d4",
-            borderColor: "#57b8d4",
+            backgroundColor: "#feb871",
+            borderColor: "#feb871",
             boxShadow: '0 4px 8px rgb(23 162 184 / 0.4)',
             fontWeight: '700',
           }}>Home</Button>
-        <Button variant="success" onClick={handleNewGame}
+        <Button variant="success" className="ms-3" onClick={handleNewGame}
           style={{
-            padding: "12px 28px",
+            padding: "10px 26px",
             fontSize: "1.25rem",
             borderRadius: "10px",
             backgroundColor: "#57b8d4",

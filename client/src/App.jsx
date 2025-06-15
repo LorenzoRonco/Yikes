@@ -45,7 +45,7 @@ function App() {
     await API.logOut();
     setLoggedIn(false);
     setUser(null);
-    setMessage({ msg: "Logout effettuato!", type: "success" });
+    //setMessage({ msg: "Logout effettuato!", type: "success" });
   };
 
   return (

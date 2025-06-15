@@ -119,7 +119,7 @@ function NotLoggedInHome() {
           borderRadius: "10px",
           backgroundColor: "#57b8d4",
           borderColor: "#57b8d4",
-          boxShadow: '0 4px 8px rgb(23 162 184 / 0.4)',
+          boxShadow: '0 4px 8px rgb(228 83 65 / 0.4)',
           fontWeight: '700',
         }}
         disabled={loading}

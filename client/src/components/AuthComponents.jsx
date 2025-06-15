@@ -29,7 +29,6 @@ function LoginForm(props) {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: "#f8f9fa", // light gray background
         padding: "1rem",
       }}
     >
