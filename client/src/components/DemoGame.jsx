@@ -1,5 +1,6 @@
 import React, { useState, useEffect, Fragment } from "react";
 import { useLocation, useNavigate } from "react-router";
+import { PlayerHand, NewCardSection } from "./GameComponents";
 import { Card, Button, Container, Row, Col, Spinner, ProgressBar } from "react-bootstrap";
 import API from "../API/API.mjs";
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -37,7 +38,7 @@ function DemoGame({ user }) {
             });
         }, 1000);
         return () => clearInterval(interval);
-    }, [timerActive]);
+    }, [timerActive]); //handleTimeout is not inserted cause it dependes from card.id, so it would be updated everytime it changes
 
     const startTimer = () => {
         setTimeLeft(30);
@@ -58,7 +59,7 @@ function DemoGame({ user }) {
             setShowFeedback(true);
             setGameFinished(true);
         } catch (err) {
-            setError("Errore durante il timeout.");
+            setError("Error during timeout");
         }
     };
 
@@ -82,7 +83,7 @@ function DemoGame({ user }) {
             setShowFeedback(true);
             setGameFinished(true);
         } catch (err) {
-            setError("Errore durante la valutazione.");
+            setError("Error during validation.");
         }
     };
 
@@ -112,7 +113,7 @@ function DemoGame({ user }) {
             setTimeLeft(30);
             setTimerActive(false);
         } catch (err) {
-            setError("Errore durante il riavvio della demo.");
+            setError("Error during demo restart");
         } finally {
             setLoading(false);
         }
@@ -121,10 +122,22 @@ function DemoGame({ user }) {
     if (!started) {
         return (
             <Container className="text-center mt-5">
-                <GameInstructions/>
+                <GameInstructions />
                 {error && <div className="text-danger mb-3">{error}</div>}
-                <Button onClick={handleStartGame} variant="primary" size="lg" disabled={loading}>
-                    {loading ? <Spinner animation="border" size="sm" /> : "Inizia il gioco demo"}
+                <Button onClick={handleStartGame} variant="primary" size="lg" disabled={loading}
+                    className="d-block mx-auto"
+                    style={{
+                        padding: "12px 28px",
+                        fontSize: "1.25rem",
+                        borderRadius: "10px",
+                        backgroundColor: "#57b8d4",
+                        borderColor: "#57b8d4",
+                        boxShadow: '0 4px 8px rgb(23 162 184 / 0.4)',
+                        transition: 'background-color 0.3s ease',
+                        fontWeight: '700',
+                    }}
+                >
+                    {loading ? <Spinner animation="border" size="sm" /> : "Start demo game"}
                 </Button>
             </Container>
         );
@@ -146,16 +159,21 @@ function DemoGame({ user }) {
 
     return (
         <Container>
-            <h2 className="my-4">Demo Game</h2>
+            <h2 className="my-4 " style={{ fontWeight: '700', color: '#E45341' }}>Demo game</h2>
+
 
             {newCard && <NewCardSection newCard={newCard} />}
 
-            <div className="mb-3">
-                <h5 className="text-danger mb-1">Tempo rimasto:</h5>
+            <div className="mb-4">
+                <h5 className="text-danger mb-2 fw-semibold">
+                    <i className="bi bi-clock-fill me-2"></i>Time left:
+                </h5>
                 <ProgressBar
                     animated
+                    striped
                     variant={timeLeft > 10 ? "primary" : "danger"}
                     now={(timeLeft / 30) * 100}
+                    style={{ height: '1.5rem', borderRadius: '1rem', fontWeight: '600', fontSize: '0.9rem' }}
                     label={`${timeLeft}s`}
                 />
             </div>
@@ -165,126 +183,101 @@ function DemoGame({ user }) {
     );
 }
 
-function PlayerHand({ initialCards, handleInsertCard }) {
-    const sorted = [...initialCards].sort((a, b) => a.misfortune - b.misfortune);
-    return (
-        <>
-            <h4>Mano del giocatore</h4>
-            <Row className="flex-nowrap overflow-auto">
-                <Col xs="auto">
-                    <Button variant="outline-primary" onClick={() => handleInsertCard(0)}>Inserisci qui</Button>
-                </Col>
-                {sorted.map((card, idx) => (
-                    <Fragment key={card.id}>
-                        <Col xs="auto">
-                            <Card style={{ width: "12rem" }}>
-                                <Card.Img variant="top" src={API.SERVER_URL + card.imageUrl} />
-                                <Card.Body>
-                                    <Card.Title style={{ fontSize: "0.9rem" }}>{card.title}</Card.Title>
-                                    <Card.Text>Misfortune: {card.misfortune}</Card.Text>
-                                </Card.Body>
-                            </Card>
-                        </Col>
-                        <Col xs="auto">
-                            <Button variant="outline-primary" onClick={() => handleInsertCard(idx + 1)}>
-                                Inserisci qui
-                            </Button>
-                        </Col>
-                    </Fragment>
-                ))}
-            </Row>
-        </>
-    );
-}
-
-function NewCardSection({ newCard }) {
-    if (!newCard) return null;
-    return (
-        <>
-            <h4>Nuova Carta</h4>
-            <Row className="mb-4">
-                <Col xs={12} md={4}>
-                    <Card>
-                        <Card.Img variant="top" src={API.SERVER_URL + newCard.imageUrl} />
-                        <Card.Body>
-                            <Card.Title>{newCard.title}</Card.Title>
-                        </Card.Body>
-                    </Card>
-                </Col>
-            </Row>
-        </>
-    );
-}
-
-function FeedbackSection({ lastGuessCorrect, wasTimeout, lastGuessCard, lastHand, gameFinished, handleHomeButton, handleRestartDemo }) {
+function FeedbackSection({ lastGuessCorrect, wasTimeout, lastGuessCard, lastHand, handleHomeButton, handleRestartDemo }) {
     return (
         <Container className="text-center mt-5">
-            <h3>
+            <h3 className={lastGuessCorrect ? "mb-3 text-success" : "mb-3 text-danger"}>
                 {lastGuessCorrect
-                    ? "Hai indovinato!"
+                    ? "You guessed correctly! ✅"
                     : wasTimeout
-                        ? "Tempo scaduto!"
-                        : "Ordine errato!"}
+                        ? "Time's over! ⏰"
+                        : "Wrong answer! ❌"}
             </h3>
 
-            <Card style={{ width: "18rem", margin: "20px auto" }}>
-                <Card.Img variant="top" src={API.SERVER_URL + lastGuessCard.imageUrl} />
-                <Card.Body>
-                    <Card.Title>{lastGuessCard.title}</Card.Title>
+            <Card className=" shadow rounded-4 overflow-hidden border-0 mb-3 mx-auto d-block"
+                style={{ width: '15rem' }}>
+                <Card.Img
+                    variant="top"
+                    src={API.SERVER_URL + lastGuessCard.imageUrl} alt={lastGuessCard.title}
+                    style={{ height: '160px', objectFit: 'cover' }} />
+                <Card.Body className="d-flex flex-column justify-content-between">
+                    <Card.Title className="fw-bold text-dark text-center">{lastGuessCard.title}</Card.Title>
                     <Card.Text>Misfortune: {lastGuessCard.misfortune}</Card.Text>
                 </Card.Body>
             </Card>
 
-            <h5 className="mt-4">La tua mano finale:</h5>
+            <h5 className="mt-4">Your final hand:</h5>
             <Row className="justify-content-center">
                 {[...lastHand]
                     .sort((a, b) => a.misfortune - b.misfortune)
                     .map((card) => (
-                        <Col xs="auto" key={card.id} className="mb-3">
-                            <Card style={{ width: "12rem" }}>
-                                <Card.Img variant="top" src={API.SERVER_URL + card.imageUrl} />
-                                <Card.Body>
-                                    <Card.Title style={{ fontSize: "0.9rem" }}>{card.title}</Card.Title>
-                                    <Card.Text>Misfortune: {card.misfortune}</Card.Text>
-                                </Card.Body>
-                            </Card>
-                        </Col>
+                        <Fragment key={card.id}>
+                            <Col xs="auto">
+                                <Card
+                                    className="shadow rounded-4 overflow-hidden border-0 mb-3"
+                                    style={{ width: '15rem' }}
+                                >
+                                    <Card.Img
+                                        variant="top"
+                                        src={API.SERVER_URL + card.imageUrl}
+                                        alt={card.title}
+                                        style={{ height: '160px', objectFit: 'cover' }}
+                                    />
+                                    <Card.Body className="d-flex flex-column justify-content-between">
+                                        <Card.Title className="fw-bold text-dark text-center">{card.title}</Card.Title>
+                                        <Card.Subtitle className="fw-bold text-dark text-center">Misfortune: {card.misfortune}</Card.Subtitle>
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                        </Fragment>
                     ))}
             </Row>
 
-            <Button variant="success" onClick={handleHomeButton} className="me-2">
-                Torna alla Home
-            </Button>
+            <Button variant="primary" className="me-3" onClick={handleHomeButton}
+                style={{
+                    padding: "10px 26px",
+                    fontSize: "1.25rem",
+                    borderRadius: "10px",
+                    backgroundColor: "#feb871",
+                    borderColor: "#feb871",
+                    boxShadow: '0 4px 8px rgb(23 162 184 / 0.4)',
+                    fontWeight: '700',
+                }}>Home</Button>
 
-            <Button variant="primary" onClick={handleRestartDemo}>
-                Prova un'altra demo
-            </Button>
+            <Button variant="success" className="ms-3" onClick={handleRestartDemo}
+                style={{
+                    padding: "10px 26px",
+                    fontSize: "1.25rem",
+                    borderRadius: "10px",
+                    backgroundColor: "#57b8d4",
+                    borderColor: "#57b8d4",
+                    boxShadow: '0 4px 8px rgb(23 162 184 / 0.4)',
+                    fontWeight: '700',
+                }}>New Demo</Button>
         </Container>
     );
 }
 
-function GameInstructions() {
-  return (
-    <Card className="mb-4">
-      <Card.Body>
-        <Card.Title>🃏 How the Game Works</Card.Title>
-        <Card.Text>
-          You start with <strong>3 random misfortune cards</strong>.<br />
-          In each round, you'll get a <strong>new situation</strong> (image and title only).<br />
-          Your task is to <strong>guess where it fits</strong> among your current cards based on its hidden badness value (1–100).
-        </Card.Text>
-        <Card.Text>
-          <span className="text-success">✅ Correct guess</span>: you get the new card.<br />
-          <span className="text-danger">❌ Wrong or timeout</span>: you lose the round.
-        </Card.Text>
-        <Card.Text>
-          <strong>Win</strong> by collecting 6 cards.<br />
-          <strong>Lose</strong> after 3 wrong guesses.
-        </Card.Text>
-      </Card.Body>
-    </Card>
-  );
+function GameInstructions() { //not created as a separate component since it's slighty different from the GamePage one
+    return (
+        <Card className="mb-4">
+            <Card.Body>
+                <Card.Title>🃏 How the Game Works</Card.Title>
+                <Card.Text>
+                    You start with <strong>3 random misfortune cards</strong>.<br />
+                    In this demo, you will play only <strong>1 round</strong>.<br />
+                    You'll receive a <strong>new situation</strong> (image and title only).<br />
+                    Your task is to <strong>guess where it fits</strong> among your current cards based on its hidden badness value (1–100).
+                </Card.Text>
+                <Card.Text>
+                    <span className="text-success">✅ Correct guess</span>: you get the new card.<br />
+                    <span className="text-danger">❌ Wrong guess or timeout</span>: you lose the round.
+                </Card.Text>
+            </Card.Body>
+        </Card>
+    );
 }
+
 
 
 export default DemoGame;

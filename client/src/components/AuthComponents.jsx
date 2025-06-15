@@ -13,7 +13,7 @@ function LoginForm({ handleLogin, message, setMessage }) {
     setLoading(true);
 
     const formData = new FormData(event.currentTarget);
-    const username = formData.get("username").trim();
+    const username = formData.get("username").trim(); //is the mail, it using 'username' as name 'cause passport requires it
     const password = formData.get("password").trim();
 
     // validation client-side
