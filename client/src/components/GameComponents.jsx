@@ -95,7 +95,6 @@ function NewCardSection({ newCard }) {
             />
             <Card.Body className="d-flex flex-column justify-content-between">
               <Card.Title className="fw-bold text-dark text-center">{newCard.title}</Card.Title>
-              <Card.Subtitle className="fw-bold text-dark text-center">Misfortune: {newCard.misfortune}</Card.Subtitle>
             </Card.Body>
           </Card>
         </Col>

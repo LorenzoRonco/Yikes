@@ -5,7 +5,7 @@ import { Card, Button, Container, Row, Col, Spinner, ProgressBar } from "react-b
 import { useNavigate } from "react-router";
 import dayjs from "dayjs";
 import API from "../API/API.mjs";
-import { PlayerHand } from "./GameComponents";
+import { PlayerHand, NewCardSection } from "./GameComponents";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function GamePage(props) {
@@ -283,34 +283,6 @@ function GamePage(props) {
 }
 
 
-function NewCardSection({ newCard }) {
-  if (!newCard) return null;
-  return (
-    <>
-      <Row className="mb-4 justify-content-center">
-        <Col xs={12} md={4} className="d-flex flex-column align-items-center">
-          <h4 className="mb-3 text-center lead text-secondary">New Card</h4>
-          <Card
-            className="shadow rounded-4 overflow-hidden border-0 mb-3"
-            style={{ width: '15rem' }}
-          >
-            <Card.Img
-              variant="top"
-              src={API.SERVER_URL + newCard.imageUrl}
-              alt={newCard.title}
-              style={{ height: '160px', objectFit: 'cover' }}
-            />
-            <Card.Body className="d-flex flex-column justify-content-between">
-              <Card.Title className="fw-bold text-dark text-center">{newCard.title}</Card.Title>
-              <Card.Subtitle className="fw-bold text-dark text-center">Misfortune: {newCard.misfortune}</Card.Subtitle>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-    </>
-  );
-}
-
 
 function FeedbackSection({ lastGuessCorrect, wasTimeout, lastGuessCard, handleNextRound, loading, roundCount, gameStatus }) {
   return (
@@ -331,7 +303,11 @@ function FeedbackSection({ lastGuessCorrect, wasTimeout, lastGuessCard, handleNe
           style={{ height: '160px', objectFit: 'cover' }} />
         <Card.Body className="d-flex flex-column justify-content-between">
           <Card.Title className="fw-bold text-dark text-center">{lastGuessCard.title}</Card.Title>
-          <Card.Text>Misfortune: {lastGuessCard.misfortune}</Card.Text>
+          {lastGuessCorrect ?
+            <Card.Subtitle className="fw-bold text-dark text-center">Misfortune: {lastGuessCard.misfortune}</Card.Subtitle>
+            :
+            <Card.Subtitle></Card.Subtitle>
+          }
         </Card.Body>
       </Card>
       <Button onClick={handleNextRound} variant="primary" size="lg" disabled={loading}
@@ -372,7 +348,7 @@ function FinalScreen({ gameStatus, lastHand, handleNewGame, loading }) {
                   style={{ height: '160px', objectFit: 'cover' }} />
                 <Card.Body className="d-flex flex-column justify-content-between">
                   <Card.Title className="fw-bold text-dark text-center">{card.title}</Card.Title>
-                  <Card.Text>Misfortune: {card.misfortune}</Card.Text>
+                  <Card.Subtitle className="fw-bold text-dark text-center">Misfortune: {card.misfortune}</Card.Subtitle>
                 </Card.Body>
               </Card>
             </Col>

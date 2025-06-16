@@ -202,7 +202,11 @@ function FeedbackSection({ lastGuessCorrect, wasTimeout, lastGuessCard, lastHand
                     style={{ height: '160px', objectFit: 'cover' }} />
                 <Card.Body className="d-flex flex-column justify-content-between">
                     <Card.Title className="fw-bold text-dark text-center">{lastGuessCard.title}</Card.Title>
-                    <Card.Text>Misfortune: {lastGuessCard.misfortune}</Card.Text>
+                    {lastGuessCorrect ? 
+                        <Card.Subtitle className="fw-bold text-dark text-center">Misfortune: {lastGuessCard.misfortune}</Card.Subtitle>
+                        :
+                        <Card.Subtitle></Card.Subtitle>
+                    }
                 </Card.Body>
             </Card>
 
