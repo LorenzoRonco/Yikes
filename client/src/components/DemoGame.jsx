@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Fragment } from "react";
+import { useState, useEffect, Fragment } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { PlayerHand, NewCardSection } from "./GameComponents";
 import { Card, Button, Container, Row, Col, Spinner, ProgressBar } from "react-bootstrap";
@@ -36,7 +36,7 @@ function DemoGame() {
                 }
                 return prev - 1;
             });
-        }, 1000);
+        }, 1000); //set interval updates every 1000 ms = 1 s
         return () => clearInterval(interval);
     }, [timerActive]); //handleTimeout is not inserted cause it dependes from card.id, so it would be updated everytime it changes
 
@@ -64,7 +64,7 @@ function DemoGame() {
     };
 
     const handleInsertCard = async (index, initialCards, newCard) => {
-        setTimerActive(false);
+        setTimerActive(false); //switchOff the timer
         try {
             const guessCard = await API.getCard(newCard.id);
             const isCorrect = await API.evaluateDemoGame(initialCards, guessCard, index);
@@ -72,8 +72,8 @@ function DemoGame() {
             let updatedHand = [...initialCards];
 
             if (isCorrect) {
-                updatedHand.splice(index, 0, guessCard);
-                updatedHand.sort((a, b) => a.misfortune - b.misfortune);
+                updatedHand.splice(index, 0, guessCard); //put guessCard in the hand
+                updatedHand.sort((a, b) => a.misfortune - b.misfortune); //sort by misfortune
                 setInitialCards(updatedHand);
             }
 
@@ -91,7 +91,8 @@ function DemoGame() {
         navigate("/");
     };
 
-    const handleInsertCardWrapper = (index) => {
+    const handleInsertCardWrapper = (index) => { //needed because when I would call handleInsertCard, I have only the index,
+        //while it needs other 2 parameters (taken from the context)
         handleInsertCard(index, initialCards, newCard);
     };
 
@@ -101,6 +102,7 @@ function DemoGame() {
         try {
             const { initialCards, newCard } = await API.createDemoGame();
 
+            //reset of the variables
             setInitialCards(initialCards);
             setNewCard(newCard);
             setStarted(false);

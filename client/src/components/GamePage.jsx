@@ -1,6 +1,5 @@
-import React from "react";
 import { useLocation, useParams } from "react-router";
-import { useEffect, useState, Fragment } from "react";
+import { useEffect, useState} from "react";
 import { Card, Button, Container, Row, Col, Spinner, ProgressBar } from "react-bootstrap";
 import { useNavigate } from "react-router";
 import dayjs from "dayjs";
@@ -34,7 +33,7 @@ function GamePage(props) {
   const [loadingNewGame, setLoadingNewGame] = useState(false);
 
   useEffect(() => {
-    if (location.state?.game && location.state?.initialCards) {
+    if (location.state?.game && location.state?.initialCards) { //location.state? checks if the states exist, and then access the value
       setGame(location.state.game);
       setInitialCards(location.state.initialCards);
       setGameStatus(location.state.game.status);
@@ -77,7 +76,7 @@ function GamePage(props) {
         }
         return prev - 1;
       });
-    }, 1000);
+    }, 1000); //set interval updates every 1000 ms = 1 s
 
     return () => clearInterval(intervalId);
   }, [timerActive]);
@@ -113,7 +112,7 @@ function GamePage(props) {
     return () => {
       setTimerActive(false);
     };
-  }, []);
+  }, []); //when the component is disassembled, it switch off the timer (otherwise it will go on in other pages)
 
 
   const handleStartGame = async () => {
@@ -138,7 +137,7 @@ function GamePage(props) {
 
     try {
       const result = await API.updateRound(gameId, roundCount, index);
-      setLastGuessCorrect(result.correct);
+      setLastGuessCorrect(result.correct); //set if the guess was correct
       setLastGuessCard(result.guessCard);
       setLastHand(result.hand);
 

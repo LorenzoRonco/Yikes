@@ -1,8 +1,5 @@
-import React from "react";
-import NavHeader from "./NavHeader";
 import { Row, Col } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Link } from "react-router";
 import { useNavigate } from "react-router";
 import { useState } from "react";
 import API from "../API/API.mjs";
@@ -24,7 +21,6 @@ function Home(props) {
        <Col> {!props.user ? <NotLoggedInHome /> : <LoggedInHome user={props.user} />}
       <HowItWorks /></Col>
       </Row>
-      
     </>
   );
 }

@@ -1,9 +1,5 @@
-import React from "react";
-import { useLocation, useParams } from "react-router";
-import { useEffect, useState, Fragment } from "react";
-import { Card, Button, Container, Row, Col, Spinner, ProgressBar } from "react-bootstrap";
-import { useNavigate } from "react-router";
-import dayjs from "dayjs";
+import { Fragment } from "react";
+import { Card, Button, Row, Col} from "react-bootstrap";
 import API from "../API/API.mjs";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -33,7 +29,7 @@ function PlayerHand({ initialCards, handleInsertCard }) {
         {initialCards
           .sort((c1, c2) => c1.misfortune - c2.misfortune)
           .map((card, idx) => (
-            <Fragment key={card.id}>
+            <Fragment key={card.id}> {/* fragment is similar to <></>, used because I have to return a single component */}
               <Col xs="auto">
                 <Card
                   className="shadow rounded-4 overflow-hidden border-0 mb-3"

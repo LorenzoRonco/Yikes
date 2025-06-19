@@ -6,7 +6,6 @@ import './NavHeader.css'
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
 function NavHeader(props) {
-  //const [darkMode, setDarkMode] = useState(false);
   const match = useMatch("/games/:gameId");
   const { darkMode, toggleDarkMode } = useContext(DarkModeContext);
 
