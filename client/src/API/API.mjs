@@ -29,6 +29,7 @@ export const getGamesHistory = async () => {
     throw new Error("Failed to fetch game history");
 };
 
+/*
 //Get single game
 //GET /api/games/:gameId
 const getGame = async (gameId) => {
@@ -43,8 +44,9 @@ const getGame = async (gameId) => {
       gameJson.status
     );
   } else throw new Error("Internal server error");
-};
+};*/
 
+/*
 //Get all rounds of a game
 //GET /api/games/:gameId/rounds
 const getRoundsOfGame = async (gameId) => {
@@ -56,7 +58,7 @@ const getRoundsOfGame = async (gameId) => {
         new GameCards(gc.gameId, gc.cardId, gc.roundId, gc.guessedCorrectly)
     );
   } else throw new Error("Internal server error");
-};
+};*/
 
 
 
@@ -256,8 +258,8 @@ const logOut = async () => {
 const API = {
   getCard,
   getGamesHistory,
-  getGame,
-  getRoundsOfGame,
+  //getGame,
+  //getRoundsOfGame,
   createGame,
   createRound,
   updateRound,

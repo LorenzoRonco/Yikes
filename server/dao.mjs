@@ -8,7 +8,7 @@ const db = new sqlite.Database("db_games.sqlite", (err) => {
 });
 
 /* CARDS */
-//get all the cards
+/* //get all the cards
 export const getCards = () => {
   return new Promise((resolve, reject) => {
     const sql = "SELECT * FROM cards";
@@ -22,7 +22,7 @@ export const getCards = () => {
       }
     });
   });
-};
+}; */
 
 //get a card by its id
 export const getCard = (id) => {
@@ -93,7 +93,7 @@ export const listGamesByUserId = (userId) => {
 };
 
 //get a game by its id
-export const getGame = (id) => {
+/* export const getGame = (id) => {
   return new Promise((resolve, reject) => {
     const sql = "SELECT games.* FROM games WHERE games.id = ?";
     db.get(sql, [id], (err, row) => {
@@ -114,7 +114,7 @@ export const getGame = (id) => {
       }
     });
   });
-};
+}; */
 
 //add a new game
 export const addGame = (game) => {

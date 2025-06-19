@@ -3,12 +3,12 @@ import express from "express";
 import morgan from "morgan";
 import { check, validationResult } from "express-validator";
 import {
-  getCards,
+  //getCards,
   getCard,
   getRandomCardsForGame,
   getRandomCards,
   listGamesByUserId,
-  getGame,
+  //getGame,
   addGame,
   updateGameStatus,
   getGameCards,
@@ -147,7 +147,7 @@ app.get("/api/games", isLoggedIn, async (req, res) => {
   }
 });
 
-// GET /api/games/:gameId
+/* // GET /api/games/:gameId
 app.get("/api/games/:id", async (req, res) => {
   try {
     const game = await getGame(req.params.id);
@@ -159,9 +159,9 @@ app.get("/api/games/:id", async (req, res) => {
   } catch {
     res.status(500).end();
   }
-});
+}); */
 
-//GET /api/games/:gameId/rounds
+/* //GET /api/games/:gameId/rounds
 app.get("/api/games/:gameId/rounds", async (req, res) => {
   try {
     const gameCards = await getGameCards(req.params.gameId);
@@ -173,7 +173,7 @@ app.get("/api/games/:gameId/rounds", async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: "Internal server error" });
   }
-});
+}); */
 
 //POST /api/games/demo
 app.post("/api/games/demo", isNotLoggedIn, async (req, res) => {
