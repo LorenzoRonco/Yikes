@@ -191,7 +191,7 @@ export const getGameCards = (gameId) => {
       if (err) {
         reject(err);
       } else if (rows.length === 0) {
-        resolve({ error: "No rounds found for this game." });
+        resolve([]);
       } else {
         const gameCards = rows.map(
           (gc) =>

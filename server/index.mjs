@@ -38,7 +38,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-app.use('/static', express.static('public')); //for cards images
+app.use("/static", express.static("public")); //for cards images
 // you can access a file using http://localhost:3001/static/{filename}
 // if the file is in a directory you have to specify the full path
 
@@ -66,7 +66,8 @@ const isLoggedIn = (req, res, next) => {
   return res.status(401).json({ error: "Not authorized" });
 };
 
-const isNotLoggedIn = (req, res, next) => { //for demo game
+const isNotLoggedIn = (req, res, next) => {
+  //for demo game
   if (!req.isAuthenticated()) {
     return next();
   }
@@ -94,14 +95,12 @@ app.get("/api/cards/:cardId", async (req, res) => {
       res.json(card);
     }
   } catch {
-    res.status(500).end();
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
 // GET /api/games
-app.get("/api/games", 
-  isLoggedIn,
-  async (req, res) => {
+app.get("/api/games", isLoggedIn, async (req, res) => {
   try {
     const games = await listGamesByUserId(req.user.id);
 
@@ -112,6 +111,13 @@ app.get("/api/games",
         const roundDetails = await Promise.all(
           rounds.map(async (r) => {
             const card = await getCard(r.cardId);
+            if (card.error) {
+              console.warn(`Card ${r.cardId} not found for round ${r.roundId}`);
+              throw {
+                status: 404,
+                message: `Card with id ${r.cardId} not found.`,
+              };
+            }
             return {
               roundId: r.roundId,
               guessedCorrectly: r.guessedCorrectly,
@@ -133,7 +139,11 @@ app.get("/api/games",
     res.json(enrichedGames);
   } catch (error) {
     console.error("Error generating game history:", error);
-    res.status(500).json({ error: "Internal server error" });
+    if (error.status === 404) {
+      res.status(404).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: "Internal server error" });
+    }
   }
 });
 
@@ -166,27 +176,23 @@ app.get("/api/games/:gameId/rounds", async (req, res) => {
 });
 
 //POST /api/games/demo
-app.post(
-  "/api/games/demo",
-  isNotLoggedIn,
-  async (req, res) => {
-    try {
-      // extract 4 random cards
-      const cards = await getRandomCards(4);
-      const initialCards = cards.slice(0,3);
-      const newCard = cards[3];
+app.post("/api/games/demo", isNotLoggedIn, async (req, res) => {
+  try {
+    // extract 4 random cards
+    const cards = await getRandomCards(4);
+    const initialCards = cards.slice(0, 3);
+    const newCard = cards[3];
 
-      // returns initial cards + guess card
-      res.status(201).json({
-        initialCards,
-        newCard
-      });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: "Internal server error" });
-    }
+    // returns initial cards + guess card
+    res.status(201).json({
+      initialCards,
+      newCard,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal server error" });
   }
-);
+});
 
 //POST /api/games/demo/evaluate-guess
 app.post(
@@ -197,7 +203,8 @@ app.post(
     check("guessCard").notEmpty(),
     check("index").optional({ nullable: true }).isInt({ min: 0 }), //optional so it recognize when user loses due to time
   ],
-  (req, res) => { //no async because there are no await inside
+  (req, res) => {
+    //no async because there are no await inside
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(422).json({ errors: errors.array() });
@@ -206,14 +213,21 @@ app.post(
     const guessCard = req.body.guessCard;
     const index = req.body.index;
 
-    const sortedHand = [...req.body.initialHand].sort((a, b) => a.misfortune - b.misfortune); //sort initial hand
-    const handWithCard = [...sortedHand.slice(0, index), guessCard, ...sortedHand.slice(index)];
-    const isCorrect = handWithCard.every((card, i, arr) => i === 0 || arr[i - 1].misfortune <= card.misfortune);
+    const sortedHand = [...req.body.initialHand].sort(
+      (a, b) => a.misfortune - b.misfortune
+    ); //sort initial hand
+    const handWithCard = [
+      ...sortedHand.slice(0, index),
+      guessCard,
+      ...sortedHand.slice(index),
+    ];
+    const isCorrect = handWithCard.every(
+      (card, i, arr) => i === 0 || arr[i - 1].misfortune <= card.misfortune
+    );
 
     return res.json({ won: isCorrect });
   }
 );
-
 
 //POST /api/games
 app.post(
@@ -222,7 +236,7 @@ app.post(
   [
     check("userId").notEmpty(),
     check("startedAt").isISO8601(),
-    check("correctGuesses").custom(value => Number(value) === 0), //ensure correctGuesses is 0
+    check("correctGuesses").custom((value) => Number(value) === 0), //ensure correctGuesses is 0
     check("status").isIn(["ongoing"]), //a new game can not be already won or lost
   ],
   async (req, res) => {
@@ -307,21 +321,17 @@ app.patch(
 );
 
 //PUT /api/games/:gameId
-app.patch(
-  "/api/games/:gameId",
-  isLoggedIn,
-  async (req, res) => {
-    const gameId = req.params.gameId;
+app.patch("/api/games/:gameId", isLoggedIn, async (req, res) => {
+  const gameId = req.params.gameId;
 
-    try {
-      const updatedGame = await updateGameStatus(gameId);
-      res.json(updatedGame);
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: "Internal server error" });
-    }
+  try {
+    const updatedGame = await updateGameStatus(gameId);
+    res.json(updatedGame);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal server error" });
   }
-);
+});
 
 // POST /api/sessions
 app.post("/api/sessions", passport.authenticate("local"), function (req, res) {
