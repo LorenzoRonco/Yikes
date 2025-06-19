@@ -95,31 +95,30 @@
   - Request parameters: not required
   - Request body: { "username": "user@email.com", "password": "userPassword" }
   - Response body: </br>
-  - **SUCCESS - 201:** { "id": 1, "username": "user@email.com", "name": "name" }</br>
-  - **401 - Unhautorized:** "Unauthorized"
+    **SUCCESS - 201:** { "id": 1, "username": "user@email.com", "name": "name" }</br>
+    **401 - Unhautorized:** "Unauthorized"
  
 - GET `/api/sessions/current`
   - Verifica se utente è autenticato, restituisce i dati dell'utente
   - Request parameters: not required
   - Request body: not required
   - Response body: </br>
-  - **SUCCESS - 200:** { "id": 1, "username": "user@email.com", "name": "name" }</br>
-  - **401 - Unhautorized:** { error: "Not authenticated" }
+    **SUCCESS - 200:** { "id": 1, "username": "user@email.com", "name": "name" }</br>
+    **401 - Unhautorized:** { error: "Not authenticated" }
  
 - DELETE `/api/sessions/current`
   - Verifica se utente è autenticato, restituisce i dati dell'utente
   - Request parameters: not required
   - Request body: not required
   - Response body: </br>
-  - **SUCCESS - 204:** None</br>
+    **SUCCESS - 204:** None</br>
 
 ## Database Tables
 
-- Table `users` - contains xx yy zz
-- Table `cards` - contains ww qq ss
-- Table `game` - contains ww qq ss
-- Table `gameCards` - contains ww qq ss
-- ...
+- Table `users` - contiene le credenziali degli utenti registrati. Contiene le seguenti colonne: id, name email, password, salt. Primary key: id.
+- Table `cards` - contiene le carte utilizzate per giocare. Contiene le seguenti colonne: id, title, imageUrl, misfortune. Primary key: id.
+- Table `games` - contiene tutte le partite giocate da utenti loggati. Contiene le seguenti colonne: id, userId, startedAt, correctGuesses, status (won/ongoing/lost). Primary key: id. Foreign key: userId.
+- Table `gameCards` - contiene tutte le carte associate ai vari round di ogni partita. Le carte iniziali sono indicate con roundId=0. La scelta della chiave primaria è stata fatta basandosi sul fatto che una carta non può uscire in più round della stessa partita. Contiene le seguenti colonne: gameId, cardId, roundId, guessedCorrectly (0=false, 1=true). Primary key: (gameId, cardId). Foreign key: cardId.
 
 ## Main React Components
 
