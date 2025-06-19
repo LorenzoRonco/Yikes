@@ -17,7 +17,7 @@
   - Request parameters: cardId,
   - Request body: not required
   - Response body:</br>
-    **SUCCESS:** {"id": 1, "title": "cardTitle", "imageUrl": "cardImageUrl", "misfortune": 10}</br>
+    **SUCCESS - 200:** {"id": 1, "title": "cardTitle", "imageUrl": "cardImageUrl", "misfortune": 10}</br>
     **404 - Not Found:** {error: "Card not available, check the inserted id."}</br>
     **500 - Internal Server Error:** None</br>
 - GET `/api/games`
@@ -25,17 +25,16 @@
   - Request parameters: not required,
   - Request body: not required
   - Response body:</br>
-    **SUCCESS:** [{"id": 1, "startedAt": "YYYY-MM-DDT10:30:00.000Z", "correctGuesses": 3, "status": "won", "rounds": [{"roundId": 0, "guessedCorrectly": true, "card": {"id": 5, "title": "cardTitle", "imageUrl": "cardImageUrl", "misfortune": 10}}, ...]}]</br>
+    **SUCCESS - 200:** [{"id": 1, "startedAt": "YYYY-MM-DDT10:30:00.000Z", "correctGuesses": 3, "status": "won", "rounds": [{"roundId": 0, "guessedCorrectly": true, "card": {"id": 5, "title": "cardTitle", "imageUrl": "cardImageUrl", "misfortune": 10}}, ...]}]</br>
     **404 - Not Found:** {error: "Card with id {cardId} not found."}</br>
     **500 - Internal Server Error:** {error: "Internal server error"}</br>
-- GET `/api/games/:gameId`
-  - Prende un singolo game dato il suo id, 
-  - Request parameters: gameId
+- POST `/api/games/demo`
+  - Crea una partita demo per l'utente non loggato, restituisce le 3 carte iniziali + la carta da indovinare
+  - Request parameters: not required,
   - Request body: not required
-  - response body content: {"id": 1, "startedAt": "YYYY-MM-DDT10:30:00.000Z", "correctGuesses": 3, "status": "won"}
-- POST `/api/something`
-  - request parameters and request body content
-  - response body content
+  - Response body:</br>
+    **SUCCESS - 201:** {initialCards:[...], newCard: "id": 1, "title": "cardTitle", "imageUrl": "cardImageUrl", "misfortune": 10}</br>
+    **500 - Internal Server Error:** {error: "Internal server error"}</br>
 - ...
 
 ## Database Tables
