@@ -150,7 +150,8 @@ Primary key: id.
 
 ## Screenshot
 
-![Screenshot](./img/screenshot.jpg)
+![game_page](./img/game_page.png)
+![user_page](./img/user_page.png)
 
 ## Users Credentials
 
