@@ -8,21 +8,6 @@ const db = new sqlite.Database("db_games.sqlite", (err) => {
 });
 
 /* CARDS */
-/* //get all the cards
-export const getCards = () => {
-  return new Promise((resolve, reject) => {
-    const sql = "SELECT * FROM cards";
-    db.all(sql, [], (err, rows) => {
-      if (err) reject(err);
-      else {
-        const cards = rows.map(
-          (c) => new Card(c.id, c.title, c.imageUrl, c.misfortune)
-        );
-        resolve(cards);
-      }
-    });
-  });
-}; */
 
 //get a card by its id
 export const getCard = (id) => {
@@ -77,7 +62,7 @@ export const listGamesByUserId = (userId) => {
     WHERE userId = ? 
     AND status IN ('won', 'lost') 
     ORDER BY startedAt DESC`;
-    // Ensure db.all is used here:
+
     db.all(sql, [userId], (err, rows) => {
       if (err) reject(err);
       else {
@@ -93,7 +78,7 @@ export const listGamesByUserId = (userId) => {
 };
 
 //get a game by its id
-/* export const getGame = (id) => {
+export const getGame = (id) => {
   return new Promise((resolve, reject) => {
     const sql = "SELECT games.* FROM games WHERE games.id = ?";
     db.get(sql, [id], (err, row) => {
@@ -114,7 +99,7 @@ export const listGamesByUserId = (userId) => {
       }
     });
   });
-}; */
+};
 
 //add a new game
 export const addGame = (game) => {
@@ -149,9 +134,11 @@ export const updateGameStatus = (gameId) => {
       WHERE gameId = ? AND guessedCorrectly = 0 AND roundId > 0
     `;
 
+    //execute the query on for the actual hand
     db.all(sqlHand, [gameId], (err, handRows) => {
       if (err) return reject(err);
 
+      //execute the query for count #wrong guesses
       db.get(sqlWrongGuesses, [gameId], (err2, countRow) => {
         if (err2) return reject(err2);
 
@@ -159,18 +146,18 @@ export const updateGameStatus = (gameId) => {
         const wrongGuesses = countRow.wrongGuesses;
 
         //change status
-        let newStatus = 'ongoing';
+        let newStatus = "ongoing";
         if (handSize >= 6) {
-          newStatus = 'won';
+          newStatus = "won";
         } else if (wrongGuesses >= 3) {
-          newStatus = 'lost';
+          newStatus = "lost";
         }
 
         //update game
         const sql = `UPDATE games SET status = ? WHERE id = ?`;
         db.run(sql, [newStatus, gameId], function (err3) {
           if (err3) return reject(err3);
-          
+
           // return the updated game
           const getSql = `SELECT * FROM games WHERE id = ?`;
           db.get(getSql, [gameId], (err4, row) => {
@@ -184,6 +171,7 @@ export const updateGameStatus = (gameId) => {
 };
 
 /** GAMES CARDS **/
+//get all gameCards where gameCards.gameId=gameId
 export const getGameCards = (gameId) => {
   return new Promise((resolve, reject) => {
     const sql = "SELECT * FROM gameCards WHERE gameCards.gameId = ?";
@@ -249,7 +237,6 @@ export const evaluateGuess = (gameId, roundId, insertIndex) => {
         if (err2) return reject(err2);
         let hand = handRows;
 
-        
         //if insertIndex==null or undefined, it means the user did not guess any card in time
         if (insertIndex === null || insertIndex === undefined) {
           const updateSQL = `UPDATE gameCards SET guessedCorrectly = 0 WHERE gameId = ? AND roundId = ?`;
@@ -261,10 +248,13 @@ export const evaluateGuess = (gameId, roundId, insertIndex) => {
         }
 
         //if insertIndex > 0, left = misfortune of prev card, else -Infinity
-        const left = insertIndex > 0 ? hand[insertIndex - 1].misfortune : -Infinity;
-        const right = insertIndex < hand.length ? hand[insertIndex].misfortune : Infinity;
+        const left =
+          insertIndex > 0 ? hand[insertIndex - 1].misfortune : -Infinity;
+        const right =
+          insertIndex < hand.length ? hand[insertIndex].misfortune : Infinity;
 
-        const correct = left <= guessCard.misfortune && guessCard.misfortune <= right;
+        const correct =
+          left <= guessCard.misfortune && guessCard.misfortune <= right;
 
         const updateGameCardSQL = `UPDATE gameCards SET guessedCorrectly = ? WHERE gameId = ? AND roundId = ?`;
 
@@ -281,7 +271,7 @@ export const evaluateGuess = (gameId, roundId, insertIndex) => {
                 else {
                   hand.push(guessCard); //add guessed card to the hand
                   hand.sort((a, b) => a.misfortune - b.misfortune); //sort the hand by misfortune
-                  resolve({ correct: true, hand: hand, guessCard: guessCard});
+                  resolve({ correct: true, hand: hand, guessCard: guessCard });
                 }
               });
             } else {
@@ -307,7 +297,7 @@ export const getUser = (email, password) => {
       } else {
         const user = { id: row.id, username: row.email, name: row.name };
 
-        crypto.scrypt(password, row.salt, 16, function (err, hashedPassword) {
+        crypto.scrypt(password, row.salt, 32, function (err, hashedPassword) {
           if (err) reject(err);
           if (
             !crypto.timingSafeEqual(

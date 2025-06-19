@@ -1,14 +1,12 @@
-// imports
 import express from "express";
 import morgan from "morgan";
 import { check, validationResult } from "express-validator";
 import {
-  //getCards,
   getCard,
   getRandomCardsForGame,
   getRandomCards,
   listGamesByUserId,
-  //getGame,
+  getGame,
   addGame,
   updateGameStatus,
   getGameCards,
@@ -104,10 +102,12 @@ app.get("/api/games", isLoggedIn, async (req, res) => {
   try {
     const games = await listGamesByUserId(req.user.id);
 
+    //add the rounds to the games
     const enrichedGames = await Promise.all(
       games.map(async (game) => {
         const rounds = await getGameCards(game.id);
 
+        //add the card to each round
         const roundDetails = await Promise.all(
           rounds.map(async (r) => {
             const card = await getCard(r.cardId);
@@ -147,34 +147,6 @@ app.get("/api/games", isLoggedIn, async (req, res) => {
   }
 });
 
-/* // GET /api/games/:gameId
-app.get("/api/games/:id", async (req, res) => {
-  try {
-    const game = await getGame(req.params.id);
-    if (game.error) {
-      res.status(404).json(game);
-    } else {
-      res.json(game);
-    }
-  } catch {
-    res.status(500).end();
-  }
-}); */
-
-/* //GET /api/games/:gameId/rounds
-app.get("/api/games/:gameId/rounds", async (req, res) => {
-  try {
-    const gameCards = await getGameCards(req.params.gameId);
-    if (gameCards.error) {
-      res.status(404).json(gameCards);
-    } else {
-      res.json(gameCards);
-    }
-  } catch (err) {
-    res.status(500).json({ error: "Internal server error" });
-  }
-}); */
-
 //POST /api/games/demo
 app.post("/api/games/demo", isNotLoggedIn, async (req, res) => {
   try {
@@ -213,6 +185,11 @@ app.post(
     const guessCard = req.body.guessCard;
     const index = req.body.index;
 
+    if (index === null) {
+      //user looses due to timeout
+      return res.json({ won: false });
+    }
+
     const sortedHand = [...req.body.initialHand].sort(
       (a, b) => a.misfortune - b.misfortune
     ); //sort initial hand
@@ -248,6 +225,7 @@ app.post(
     const gameData = req.body;
 
     try {
+      //insert the new game
       const gameId = await addGame(gameData);
 
       // extract 3 initial random cards
@@ -273,8 +251,11 @@ app.post(
 app.post("/api/games/:gameId/rounds", isLoggedIn, async (req, res) => {
   const gameId = req.params.gameId;
   try {
+    let game = await getGame(gameId);
+    if (game.error) {
+      return res.status(404).json({ error: game.error });
+    }
     // extract a new random card that has not been played yet
-    //the cards are sent without the misfortune, so client cannot cheat
     const newCards = await getRandomCardsForGame(gameId, 1);
     if (!newCards || newCards.length === 0) {
       return res.status(404).json({ error: "No more cards available." });
@@ -310,6 +291,21 @@ app.patch(
     const { gameId, roundId } = req.params;
     const { insertIndex } = req.body;
 
+    let game = await getGame(gameId);
+    if (game.error) {
+      return res.status(404).json({ error: game.error });
+    }
+
+    let gameCards = getGameCards(gameId);
+    const found = gameCards.some(
+      (gc) => gc.gameId === gameId && gc.roundId === targetRoundId
+    );
+    if (!found) {
+      return res
+        .status(404)
+        .json({ error: "Round not available, check the inserted id." });
+    }
+
     try {
       const result = await evaluateGuess(gameId, roundId, insertIndex);
       res.json(result); //{ correct: true/false, hand, cardGuessed}
@@ -325,6 +321,10 @@ app.patch("/api/games/:gameId", isLoggedIn, async (req, res) => {
   const gameId = req.params.gameId;
 
   try {
+    let game = await getGame(gameId);
+    if (game.error) {
+      return res.status(404).json({ error: game.error });
+    }
     const updatedGame = await updateGameStatus(gameId);
     res.json(updatedGame);
   } catch (err) {
@@ -348,7 +348,7 @@ app.get("/api/sessions/current", (req, res) => {
 // DELETE /api/session/current
 app.delete("/api/sessions/current", (req, res) => {
   req.logout(() => {
-    res.end();
+    res.status(204).end();
   });
 });
 
