@@ -1,4 +1,4 @@
-import { Card, Game, GameCards } from "../models/GCModels.mjs";
+import { Card, Game } from "../models/GCModels.mjs";
 
 const SERVER_URL = "http://localhost:3001";
 
@@ -16,53 +16,17 @@ const getCard = async (cardId) => {
   } else throw new Error("Internal server error");
 };
 
-
 //Get all games of logged user
 //GET /api/games
 export const getGamesHistory = async () => {
   const response = await fetch(SERVER_URL + `/api/games`, {
     credentials: "include",
   });
-  if (response.ok) 
-    return await response.json();
-  else
-    throw new Error("Failed to fetch game history");
+  if (response.ok) return await response.json();
+  else throw new Error("Failed to fetch game history");
 };
 
-/*
-//Get single game
-//GET /api/games/:gameId
-const getGame = async (gameId) => {
-  const response = await fetch(SERVER_URL + `/api/games/${gameId}`);
-  if (response.ok) {
-    const gameJson = await response.json();
-    return new Game(
-      gameJson.id,
-      gameJson.userId,
-      gameJson.startedAt,
-      gameJson.correctGuesses,
-      gameJson.status
-    );
-  } else throw new Error("Internal server error");
-};*/
-
-/*
-//Get all rounds of a game
-//GET /api/games/:gameId/rounds
-const getRoundsOfGame = async (gameId) => {
-  const response = await fetch(SERVER_URL + `/api/games/${gameId}/rounds`);
-  if (response.ok) {
-    const gameCardsJson = await response.json();
-    return gameCardsJson.map(
-      (gc) =>
-        new GameCards(gc.gameId, gc.cardId, gc.roundId, gc.guessedCorrectly)
-    );
-  } else throw new Error("Internal server error");
-};*/
-
-
-
-//post /api/games/demo (per la partita demo dell’utente anonimo)
+//POST /api/games/demo (per la partita demo dell’utente anonimo)
 const createDemoGame = async () => {
   const response = await fetch(SERVER_URL + "/api/games/demo", {
     method: "POST",
@@ -74,14 +38,14 @@ const createDemoGame = async () => {
   if (response.ok) {
     const responseJson = await response.json();
     return {
-      initialCards: responseJson.initialCards.map((g) =>
-        new Card(g.id, g.title, g.imageUrl, g.misfortune)
+      initialCards: responseJson.initialCards.map(
+        (g) => new Card(g.id, g.title, g.imageUrl, g.misfortune)
       ),
       newCard: new Card(
         responseJson.newCard.id,
         responseJson.newCard.title,
         responseJson.newCard.imageUrl
-      )
+      ),
     };
   } else throw new Error("Internal server error");
 };
@@ -133,8 +97,8 @@ const createGame = async (game) => {
         gameJson.correctGuesses,
         gameJson.status
       ),
-      initialCards: gameJson.initialCards.map((g) =>
-        new Card(g.id, g.title, g.imageUrl, g.misfortune)
+      initialCards: gameJson.initialCards.map(
+        (g) => new Card(g.id, g.title, g.imageUrl, g.misfortune)
       ), //return also initial cards
     };
   } else {
@@ -156,17 +120,13 @@ const createRound = async (gameId, round) => {
   });
   if (response.ok) {
     const cardJson = await response.json();
-    return new Card(
-      cardJson.id,
-      cardJson.title,
-      cardJson.imageUrl,
-    );
+    return new Card(cardJson.id, cardJson.title, cardJson.imageUrl);
   } else {
     const errDetails = await response.text();
     throw errDetails;
   }
 };
-//TODO: modifica API per validazione timer
+
 //verifies if the guessed card is correct, updates GameCards and Game.correctGuesses
 //PUT /api/games/:gameId/rounds/:roundId
 export const updateRound = async (gameId, roundId, insertIndex) => {
@@ -198,7 +158,7 @@ const updateGame = async (gameId) => {
     headers: {
       "Content-Type": "application/json",
     },
-    credentials: "include"
+    credentials: "include",
   });
   if (response.ok) {
     const gameJson = await response.json();
@@ -258,8 +218,6 @@ const logOut = async () => {
 const API = {
   getCard,
   getGamesHistory,
-  //getGame,
-  //getRoundsOfGame,
   createGame,
   createRound,
   updateRound,
