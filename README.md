@@ -4,8 +4,8 @@
 
 ## React Client Application Routes
 
-- Route `/`: home page, permette ad utente di loggarsi per iniziare una nuova partita e di accedere al proprio profilo. In alternativa può iniziare una partita demo da non loggato. 
-- Route `/games/:gameId`: permette a un utente loggato di giocare una nuova partita. Nella stessa pagina vengono mostrate le regole, ciascun round, il recap di fine round e di fine partita. Il gameId della nuova partita viene passata come parametro.
+- Route `/`: home page, permette all' utente di loggarsi per iniziare una nuova partita e di accedere al proprio profilo. In alternativa può iniziare una partita demo da non loggato. 
+- Route `/games/:gameId`: permette a un utente loggato di giocare una nuova partita. Nella stessa pagina vengono mostrate le regole, la schermata per ciascun round, il recap di fine round e di fine partita. Il gameId della nuova partita viene passata come parametro.
 - Route `/games/demo`: permette a un utente non loggato di giocare una nuova partita demo. Il funzionamento è simile a quello di `/games/:gameId`, limitando però il numero di round a 1. Non sono passati parametri, in quanto la partita non sarà registrata nel database.
 - Route `/profile`: permette ad utente di accedere al proprio profilo, dove egli può trovare la cronologia delle proprie partite e le proprie statistiche. In caso l'utente non sia loggato viene reindirizzato alla home page.
 - Route `/login`: permette a un utente di eseguire il login, restituendo un errore in caso di credenziali errate. In caso l'utente sia già loggato viene reindirizzato alla home page.
