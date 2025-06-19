@@ -1,0 +1,11 @@
+#user-dropdown::after { 
+  display: none !important; /* hides the arrow of the dropdown */
+}
+
+.navbar-brand {
+  font-family: 'Luckiest Guy', cursive;
+  font-size: 2.5rem; 
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
