@@ -146,7 +146,7 @@ Primary key: id.
 - `LoginForm` (in `AuthComponents.jsx`): contiene il form per permettere all'utente di loggarsi. Contiene anche una validazione client-side dei dati inseriti, che verrà ripetuta anche server-side dopo la chiamata all'API.
 - Sono stati omessi componenti minori come `Stats` in (in `ProfilePage.jsx), `NavHeader` (in `NavHeader.jsx),... il cui scopo è principalmente grafico.
 
-(only _main_ components, minor ones may be skipped)
+
 
 ## Screenshot
 
