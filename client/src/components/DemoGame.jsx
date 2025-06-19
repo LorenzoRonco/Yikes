@@ -5,7 +5,7 @@ import { Card, Button, Container, Row, Col, Spinner, ProgressBar } from "react-b
 import API from "../API/API.mjs";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-function DemoGame({ user }) {
+function DemoGame() {
     const navigate = useNavigate();
     const location = useLocation();
 
