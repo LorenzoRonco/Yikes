@@ -87,11 +87,11 @@ app.use(passport.authenticate("session"));
 //GET /api/cards/:cardId
 app.get("/api/cards/:cardId", async (req, res) => {
   try {
-    const game = await getCard(req.params.cardId);
-    if (game.error) {
-      res.status(404).json(game);
+    const card = await getCard(req.params.cardId);
+    if (card.error) {
+      res.status(404).json(card);
     } else {
-      res.json(game);
+      res.json(card);
     }
   } catch {
     res.status(500).end();
