@@ -10,6 +10,7 @@ import API from "./API/API.mjs";
 import GamePage from "./components/GamePage";
 import ProfilePage from "./components/ProfilePage";
 import "./App.css"
+import { DarkModeProvider } from "./components/DarkModeProvider";
 
 
 function App() {
@@ -46,20 +47,22 @@ function App() {
     await API.logOut();
     setLoggedIn(false);
     setUser(null);
-    //setMessage({ msg: "Logout effettuato!", type: "success" });
+
   };
 
   return (
+    <DarkModeProvider>
     <Routes>
       <Route element={<DefaultLayout loggedIn={loggedIn} handleLogout={handleLogout} user={user} message={message} setMessage={setMessage} />}>
         <Route path="/" element={<Home user={user} />} />
         <Route path="/games/:gameId" element={<GamePage user={user} />}></Route>
-        <Route path="/games/demo" element={<DemoGame/>}></Route>
+        <Route path="/games/demo" element={<DemoGame />}></Route>
         <Route path="/profile" element={loggedIn ? <ProfilePage user={user} /> : <Navigate replace to="/" />}></Route> {/* if user not logged id, redirect him to the home*/}
       </Route>
       <Route path="/login" element={loggedIn ? (<Navigate replace to="/" />) : (<LoginForm handleLogin={handleLogin} message={message} setMessage={setMessage} />)} />
       <Route path="*" element={<NotFound />} />
     </Routes>
+    </DarkModeProvider>
   );
 }
 

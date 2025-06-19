@@ -288,7 +288,8 @@ app.patch(
       return res.status(422).json({ errors: errors.array() });
     }
 
-    const { gameId, roundId } = req.params;
+    const gameId = Number(req.params.gameId);
+    const roundId = Number(req.params.roundId);
     const { insertIndex } = req.body;
 
     let game = await getGame(gameId);
@@ -296,9 +297,9 @@ app.patch(
       return res.status(404).json({ error: game.error });
     }
 
-    let gameCards = getGameCards(gameId);
+    let gameCards = await getGameCards(gameId);
     const found = gameCards.some(
-      (gc) => gc.gameId === gameId && gc.roundId === targetRoundId
+      (gc) => gc.gameId === gameId && gc.roundId === roundId
     );
     if (!found) {
       return res

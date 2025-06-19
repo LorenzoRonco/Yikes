@@ -1,23 +1,14 @@
-import { useEffect, useState } from 'react';
 import { Button, Container, Navbar, Dropdown } from 'react-bootstrap';
 import { Link, useMatch } from "react-router";
-import 'bootstrap-icons/font/bootstrap-icons.css';
+import { useContext } from 'react';
+import { DarkModeContext } from './darkModeContext';
 import './NavHeader.css'
+import 'bootstrap-icons/font/bootstrap-icons.css';
 
 function NavHeader(props) {
-  const [darkMode, setDarkMode] = useState(false);
+  //const [darkMode, setDarkMode] = useState(false);
   const match = useMatch("/games/:gameId");
-
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.setAttribute("data-bs-theme", "dark");
-      document.body.style.backgroundColor = '#1A1A1D';  // dark mode
-    } else {
-      document.documentElement.removeAttribute("data-bs-theme");
-      document.body.style.backgroundColor = '#FFF6EB';  // light mode
-    }
-  }, [darkMode]);
-
+  const { darkMode, toggleDarkMode } = useContext(DarkModeContext);
 
   return (
     <Navbar style={{ backgroundColor: darkMode ? '#370617' : '#FFDD99', height: '60px' }}>
@@ -29,7 +20,7 @@ function NavHeader(props) {
         )}
 
         <div className="d-flex align-items-center gap-2">
-          <Button onClick={() => setDarkMode(oldMode => !oldMode)}
+          <Button onClick={toggleDarkMode}
             style={{
               backgroundColor: darkMode ? '#370617' : '#FFDD99',
               borderColor: darkMode ? '#370617' : '#FFDD99',
@@ -52,13 +43,13 @@ function NavHeader(props) {
                   backgroundColor: darkMode ? '#B2B2B2' : '#feb871',
                   borderColor: darkMode ? '#B2B2B2' : '#feb871',
                   borderRadius: '8px',
-                  fontSize: '1.1rem', 
+                  fontSize: '1.1rem',
                   fontWeight: '450',
                   color: '#1a1a1d'
                 }}
               >
-                <i className="bi bi-person-circle fs-4" style={{color : '#1a1a1d'}}/>
-                <span style={{color : '#1a1a1d'}}>{props.user?.name || "Utente"}</span>
+                <i className="bi bi-person-circle fs-4" style={{ color: '#1a1a1d' }} />
+                <span style={{ color: '#1a1a1d' }}>{props.user?.name || "Utente"}</span>
               </Dropdown.Toggle>
 
 
